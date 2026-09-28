@@ -5,6 +5,9 @@ analyzer:
     - lib/l10n/app_localizations*.dart
     - build/**
     - android/**
+    - web/**
+    - windows/**
+    - ios/**
 
 formatter:
   page_width: 110

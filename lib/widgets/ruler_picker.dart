@@ -265,16 +265,68 @@ Future<double?> askRuler(
     builder: (sheet) => StatefulBuilder(
       builder: (sheet, setSheet) {
         final gc = sheet.gc;
+        void changeVal(double delta) {
+          final next = (current + delta).clamp(min, max);
+          setSheet(() => current = ((next / step).round() * step).toDouble());
+        }
+
         final reading = Row(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            RollingText(show(current), style: AppTheme.f(54, weight: FontWeight.w800, color: gc.text, height: 1.1)),
-            if (unit.isNotEmpty) ...[
-              const SizedBox(width: 6),
-              Text(unit, style: AppTheme.f(18, weight: FontWeight.w700, color: gc.textSecondary)),
-            ],
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => changeVal(-step),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: gc.bgRaised2,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(PhosphorIconsBold.minus, size: 20, color: gc.text),
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () async {
+                final typed = await askNumber(sheet,
+                    title: title, initial: show(current), decimal: step != step.roundToDouble());
+                if (typed == null) return;
+                setSheet(() => current = ((typed.clamp(min, max) / step).round() * step).toDouble());
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  RollingText(show(current), style: AppTheme.f(48, weight: FontWeight.w800, color: gc.text, height: 1.1)),
+                  if (unit.isNotEmpty) ...[
+                    const SizedBox(width: 6),
+                    Text(unit, style: AppTheme.f(18, weight: FontWeight.w700, color: gc.textSecondary)),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => changeVal(step),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: gc.bgRaised2,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(PhosphorIconsBold.plus, size: 20, color: gc.text),
+                ),
+              ),
+            ),
           ],
         );
         final ruler = RulerPicker(

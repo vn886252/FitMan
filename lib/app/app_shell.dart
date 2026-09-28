@@ -13,6 +13,7 @@ import '../screens/exercise_detail_screen.dart';
 import '../screens/exercises_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/measures_screen.dart';
+import '../screens/meals_screen.dart';
 import '../screens/note_edit_screen.dart';
 import '../screens/notes_screen.dart';
 import '../screens/onboarding_screen.dart';
@@ -63,6 +64,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     'preferences',
     'tools',
     'tools-detail',
+    'meals',
   };
 
   static const _firstAwardWait = Duration(milliseconds: 4000);
@@ -379,6 +381,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         return NotesScreen();
       case 'note-edit':
         return NoteEditScreen(key: ValueKey(fit.editingNoteId ?? 'new'));
+      case 'meals':
+        return const MealsScreen();
       case 'home':
       default:
         return HomeScreen();

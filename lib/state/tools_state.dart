@@ -34,6 +34,8 @@ mixin ToolsState on FitCore {
 
   void goTools() => pushRoute('tools');
 
+  void goMeals() => pushRoute('meals');
+
   void openTool(String id) {
     activeToolId = id;
     pushRoute('tools-detail');

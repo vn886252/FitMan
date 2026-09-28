@@ -232,8 +232,11 @@ class RoutinesScreen extends StatelessWidget {
     );
   }
 
-  Widget _templateCard(
-      BuildContext context, GymColors gc, BuildContext sheet, ProgramTemplate template) {
+  Widget _templateCard(BuildContext context, GymColors gc, BuildContext sheet, ProgramTemplate template) {
+    final isRecommended = (fit.profile.isBeginner && template.id == 'beginner_friendly') ||
+        (fit.profile.isAdvanced && template.id == 'ppl_6day') ||
+        (fit.profile.isIntermediate && template.id == 'upperlower');
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -247,24 +250,50 @@ class RoutinesScreen extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: gc.bgRaised2,
+          color: isRecommended ? gc.accent.withValues(alpha: 0.08) : gc.bgRaised2,
           borderRadius: BorderRadius.circular(16),
+          border: isRecommended ? Border.all(color: gc.accent.withValues(alpha: 0.4), width: 1.2) : null,
         ),
         child: Row(
           children: [
             Container(
               width: 42,
               height: 42,
-              decoration: BoxDecoration(color: gc.emberSoft, borderRadius: BorderRadius.circular(12)),
-              child: Icon(PhosphorIconsRegular.stack, size: 20, color: gc.ember),
+              decoration: BoxDecoration(
+                color: isRecommended ? gc.accent : gc.emberSoft,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                PhosphorIconsRegular.stack,
+                size: 20,
+                color: isRecommended ? Colors.white : gc.ember,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(template.name,
-                      style: AppTheme.f(15, weight: FontWeight.w700, color: gc.text, letterSpacing: 0.5)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(template.name,
+                            style: AppTheme.f(15, weight: FontWeight.w700, color: gc.text, letterSpacing: 0.5)),
+                      ),
+                      if (isRecommended) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: gc.accent,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text('${"DÀNH CHO BẠN"}',
+                              style: TextStyle(
+                                  fontSize: 8.5, fontWeight: FontWeight.w800, color: gc.bg)),
+                        ),
+                      ],
+                    ],
+                  ),
                   const SizedBox(height: 2),
                   Text(t.templateBlurb(template.id),
                       style: AppTheme.f(12, weight: FontWeight.w500, color: gc.textSecondary, height: 1.35)),

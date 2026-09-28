@@ -3,7 +3,16 @@ part of 'fit_state.dart';
 mixin StatsState on FitCore, ToolsState, LibraryState, TimelineState {
   List<Exercise> recommendedExercises(int n) {
     final muscles = suggestedFocus.muscles;
-    final pool = kExercises.where((e) => !noSuggest.contains(e.id));
+    final pool = kExercises.where((e) => !noSuggest.contains(e.id)).toList();
+    if (profile.isBeginner) {
+      pool.sort((a, b) {
+        final aEq = a.equipment.toLowerCase();
+        final bEq = b.equipment.toLowerCase();
+        final aSafe = (aEq == 'machine' || aEq == 'cable' || aEq == 'dumbbell') ? 0 : 1;
+        final bSafe = (bEq == 'machine' || bEq == 'cable' || bEq == 'dumbbell') ? 0 : 1;
+        return aSafe.compareTo(bSafe);
+      });
+    }
     final picks = [
       for (final m in muscles) ...pool.where((e) => e.primary == m).take(1),
     ];
@@ -18,6 +27,26 @@ mixin StatsState on FitCore, ToolsState, LibraryState, TimelineState {
   int get athleteLevel => 1 + totalSessions ~/ 10;
 
   int get sessionsToNextLevel => 10 - totalSessions % 10;
+
+  /// Đếm số buổi tập trong 4 tuần gần nhất
+  int get recentSessionsCount {
+    final cutoff = DateTime.now().subtract(const Duration(days: 28));
+    return sessions.where((s) => s.date.isAfter(cutoff)).length;
+  }
+
+  /// Tuần hiện tại trong chu kỳ Mesocycle 6 tuần (1 - 6)
+  int get currentCycleWeek => (totalSessions ~/ 4) % 6 + 1;
+
+  /// Tên giai đoạn chu kỳ hiện tại
+  String get currentCyclePhase {
+    final w = currentCycleWeek;
+    if (w <= 3) return 'Hypertrophy · Tăng cơ (RPE 7-8)';
+    if (w <= 5) return 'Strength · Sức mạnh (RPE 8-9)';
+    return 'Deload · Phục hồi khớp & CNS';
+  }
+
+  /// Cảnh báo Deload nếu đã tập dồn dập 16+ buổi trong 4 tuần hoặc đang ở tuần 6
+  bool get isDeloadRecommended => recentSessionsCount >= 16 || currentCycleWeek == 6;
 
   BodyweightEntry? get latestBodyweight =>
       bodyweight.isEmpty ? null : bodyweight.reduce((a, b) => a.date.isAfter(b.date) ? a : b);

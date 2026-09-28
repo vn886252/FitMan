@@ -178,7 +178,7 @@ class RestAlarm {
       _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
 
   Future<bool> notificationsAllowed() async {
-    if (!_ready) return true;
+    if (kIsWeb || !_ready) return true;
     try {
       if (Platform.isIOS) {
         final options = await _iosPlugin?.checkPermissions();
@@ -191,7 +191,7 @@ class RestAlarm {
   }
 
   Future<bool> requestPermission() async {
-    if (!_ready) return true;
+    if (kIsWeb || !_ready) return true;
     try {
       if (Platform.isIOS) {
         return await _iosPlugin?.requestPermissions(alert: true, sound: true) ?? true;

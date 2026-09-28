@@ -102,6 +102,29 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
     int rank(Exercise e) {
       if (favorites[e.id] == true) return 0;
       if (exerciseHistory(e.id).isNotEmpty) return 1;
+      final eq = e.equipment.toLowerCase();
+      final name = e.name.toLowerCase();
+      if (profile.isBeginner) {
+        // Cho người mới: ưu tiên máy tập (Machine), cáp (Cable), tạ đơn (Dumbbell)
+        // Tránh các bài kỹ thuật phức tạp hoặc áp lực cột sống lớn (Deadlift, Clean, Snatch, Barbell Squat)
+        final isHard = name.contains('deadlift') ||
+            name.contains('clean') ||
+            name.contains('snatch') ||
+            (eq == 'barbell' && (name.contains('squat') || name.contains('row')));
+        final isBeginnerFriendly = eq == 'machine' || eq == 'cable' || eq == 'dumbbell';
+        if (isBeginnerFriendly && !isHard) return 2;
+        if (isHard) return 5;
+        return 3;
+      } else if (profile.isAdvanced) {
+        final isCompound = eq == 'barbell' &&
+            (name.contains('squat') ||
+                name.contains('bench') ||
+                name.contains('deadlift') ||
+                name.contains('press') ||
+                name.contains('row'));
+        if (isCompound) return 2;
+        return 3;
+      }
       return 2;
     }
 
@@ -222,6 +245,42 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
     return [for (var i = 0; i < kDefaultRoutineSets; i++) SessionSet(0, 0, false, sec: 30)];
   }
 
+  double defaultOpeningWeight(String id) {
+    if (isRepsOnly(id)) return 0.0;
+    final ex = exerciseById(id);
+    if (ex == null) return 20.0;
+    final eq = ex.equipment.toLowerCase();
+    final name = ex.name.toLowerCase();
+    if (eq == 'bodyweight') return 0.0;
+
+    final isBeg = profile.isBeginner;
+    final isAdv = profile.isAdvanced;
+
+    if (name.contains('squat') || name.contains('deadlift') || name.contains('leg press')) {
+      if (isBeg) return 20.0;
+      if (isAdv) return 50.0;
+      return 40.0;
+    }
+    if (name.contains('bench press')) {
+      if (isBeg) return 20.0;
+      if (isAdv) return 40.0;
+      return 30.0;
+    }
+    if (eq == 'dumbbell') {
+      if (name.contains('lateral') || name.contains('fly')) {
+        return isBeg ? 4.0 : (isAdv ? 8.0 : 6.0);
+      }
+      return isBeg ? 6.0 : (isAdv ? 14.0 : 10.0);
+    }
+    if (eq == 'cable' || name.contains('lateral') || name.contains('face pull') || name.contains('pushdown') || name.contains('curl')) {
+      return isBeg ? 7.5 : (isAdv ? 15.0 : 10.0);
+    }
+    if (eq == 'barbell') {
+      return isBeg ? 20.0 : (isAdv ? 35.0 : 25.0);
+    }
+    return isBeg ? 15.0 : 20.0;
+  }
+
   List<SessionSet> _workingOpeners(String id, {int? count}) {
     final last = lastSetsFor(id).where((l) => l.counts).toList();
     final mode = modeOf(id);
@@ -232,7 +291,7 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
       final bump = _progressBump(id, last);
       base = last.map((l) => SessionSet(l.reps, l.weight + bump, false)).toList();
     } else {
-      final w = isRepsOnly(id) ? 0.0 : 20.0;
+      final w = defaultOpeningWeight(id);
       base = [for (var i = 0; i < kDefaultRoutineSets; i++) SessionSet(10, w, false)];
     }
     if (count == null || count == base.length) return base;

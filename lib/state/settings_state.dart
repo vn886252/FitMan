@@ -39,12 +39,15 @@ mixin SettingsState on FitCore, ToolsState, LibraryState {
   bool onboarded = false;
   bool alarmAllowed = true;
   int? alarmAskedAt;
-  String language = 'en';
+  String language = 'vi';
 
   Locale get locale => localeOf(language);
 
-  void _adoptDeviceLanguage() =>
-      _applyLanguage(PlatformDispatcher.instance.locale.toLanguageTag());
+  void _adoptDeviceLanguage() {
+    final dev = PlatformDispatcher.instance.locale.toLanguageTag();
+    final resolved = resolveLanguage(dev);
+    _applyLanguage(resolved == 'en' ? 'vi' : resolved);
+  }
 
   void _applyLanguage(String code) {
     setAppLanguage(code);
@@ -99,6 +102,8 @@ mixin SettingsState on FitCore, ToolsState, LibraryState {
     double? weightDelta,
     double? activity,
     int? weeklyGoalDelta,
+    String? experienceLevel,
+    String? fitnessGoal,
   }) {
     if (name != null) profile.name = name.trim();
     if (sex != null) profile.sex = sex;
@@ -107,6 +112,8 @@ mixin SettingsState on FitCore, ToolsState, LibraryState {
     if (weightDelta != null) profile.weightKg = _clamp(profile.weightKg + weightDelta, 30, 250);
     if (activity != null) profile.activity = activity;
     if (weeklyGoalDelta != null) profile.weeklyGoal = (profile.weeklyGoal + weeklyGoalDelta).clamp(1, 14);
+    if (experienceLevel != null) profile.experienceLevel = experienceLevel;
+    if (fitnessGoal != null) profile.fitnessGoal = fitnessGoal;
     _seedCalculatorsFromProfile();
     _persist();
     notifyListeners();

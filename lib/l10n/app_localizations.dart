@@ -19,6 +19,7 @@ import 'app_localizations_pt.dart';
 import 'app_localizations_ru.dart';
 import 'app_localizations_tr.dart';
 import 'app_localizations_uk.dart';
+import 'app_localizations_vi.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -118,6 +119,7 @@ abstract class AppLocalizations {
     Locale('ru'),
     Locale('tr'),
     Locale('uk'),
+    Locale('vi'),
     Locale('zh'),
     Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
   ];
@@ -792,7 +794,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{n}h'**
-  String hoursShort(int n);
+  String hoursShort(int n, Object h);
 
   /// No description provided for @consistency.
   ///
@@ -2327,7 +2329,7 @@ abstract class AppLocalizations {
   /// No description provided for @importHint.
   ///
   /// In en, this message translates to:
-  /// **'Choose a .zip (or older .json) backup exported from GymMane. This replaces your current data, media included.'**
+  /// **'Choose a .zip (or older .json) backup exported from FitMan. This replaces your current data, media included.'**
   String get importHint;
 
   /// No description provided for @import.
@@ -2399,7 +2401,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutGymmane.
   ///
   /// In en, this message translates to:
-  /// **'About GymMane'**
+  /// **'About FitMan'**
   String get aboutGymmane;
 
   /// No description provided for @yourProfile.
@@ -3815,7 +3817,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiIntro.
   ///
   /// In en, this message translates to:
-  /// **'GymMane never talks to an AI. You take your exercise list out, you paste it into whatever assistant you already use, and you bring its answer back in. Nothing leaves the phone on its own.'**
+  /// **'FitMan never talks to an AI. You take your exercise list out, you paste it into whatever assistant you already use, and you bring its answer back in. Nothing leaves the phone on its own.'**
   String get aiIntro;
 
   /// No description provided for @aiStep1.
@@ -3875,7 +3877,7 @@ abstract class AppLocalizations {
   /// No description provided for @awardFirstStepLine.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to GymMane. This one is on the house.'**
+  /// **'Welcome to FitMan. This one is on the house.'**
   String get awardFirstStepLine;
 
   /// No description provided for @awardFirstWorkoutName.
@@ -4955,7 +4957,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareMessage.
   ///
   /// In en, this message translates to:
-  /// **'{name} — open the file with GymMane to add it.'**
+  /// **'{name} — open the file with FitMan to add it.'**
   String shareMessage(String name);
 
   /// No description provided for @importRoutines.
@@ -4967,7 +4969,7 @@ abstract class AppLocalizations {
   /// No description provided for @importPasteHint.
   ///
   /// In en, this message translates to:
-  /// **'Paste a routine here: one shared from GymMane, an AI answer, JSON or CSV.'**
+  /// **'Paste a routine here: one shared from FitMan, an AI answer, JSON or CSV.'**
   String get importPasteHint;
 
   /// No description provided for @pasteAction.
@@ -5009,13 +5011,13 @@ abstract class AppLocalizations {
   /// No description provided for @nothingToImport.
   ///
   /// In en, this message translates to:
-  /// **'Nothing here GymMane can import'**
+  /// **'Nothing here FitMan can import'**
   String get nothingToImport;
 
   /// No description provided for @aiStepCopy.
   ///
   /// In en, this message translates to:
-  /// **'Copy the request. It carries your exercise list and the format GymMane reads.'**
+  /// **'Copy the request. It carries your exercise list and the format FitMan reads.'**
   String get aiStepCopy;
 
   /// No description provided for @aiStepAsk.
@@ -5273,7 +5275,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareIntroBody.
   ///
   /// In en, this message translates to:
-  /// **'Send it to your partner, a friend or your family. They get a small file that opens in GymMane and adds it in one tap, with its sets and weights.'**
+  /// **'Send it to your partner, a friend or your family. They get a small file that opens in FitMan and adds it in one tap, with its sets and weights.'**
   String get shareIntroBody;
 
   /// No description provided for @removedFromRoutine.
@@ -5365,6 +5367,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Medals and levels'**
   String get gamificationSetting;
+
+  /// No description provided for @vietnameseMealsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'VIETNAMESE MEALS'**
+  String get vietnameseMealsTitle;
+
+  /// No description provided for @vietnameseMealsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness nutrition tailored for Vietnamese cuisine'**
+  String get vietnameseMealsDesc;
+
+  /// No description provided for @vietnameseMealsHomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Vietnamese meals'**
+  String get vietnameseMealsHomeTitle;
+
+  /// No description provided for @vietnameseMealsHomeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pho, broken rice, chicken breast... Track & count macros'**
+  String get vietnameseMealsHomeSub;
+
+  /// No description provided for @viewMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'View meals'**
+  String get viewMeals;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -5391,6 +5423,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
     'ru',
     'tr',
     'uk',
+    'vi',
     'zh',
   ].contains(locale.languageCode);
 
@@ -5441,6 +5474,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsTr();
     case 'uk':
       return AppLocalizationsUk();
+    case 'vi':
+      return AppLocalizationsVi();
     case 'zh':
       return AppLocalizationsZh();
   }

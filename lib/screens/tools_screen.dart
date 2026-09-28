@@ -38,7 +38,46 @@ class ToolsScreen extends StatelessWidget {
               titleSize: 22,
               subtitle: t.calculatorsCount(kToolMeta.length),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 18),
+            GestureDetector(
+              onTap: fit.goMeals,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: gc.bgRaised,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: gc.accent.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: gc.accentSoft,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Center(child: Text('🍲', style: TextStyle(fontSize: 24))),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(t.vietnameseMealsHomeTitle,
+                              style: AppTheme.f(15, weight: FontWeight.w800, color: gc.text)),
+                          const SizedBox(height: 2),
+                          Text(t.vietnameseMealsHomeSub,
+                              style: AppTheme.s(12, color: gc.textSecondary)),
+                        ],
+                      ),
+                    ),
+                    Icon(PhosphorIconsRegular.caretRight, size: 18, color: gc.accent),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,

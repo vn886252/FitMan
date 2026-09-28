@@ -5,6 +5,7 @@ import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gymmane/catalog/exercise_catalog.dart';
 import 'package:gymmane/l10n/catalog_es.dart';
+import 'package:gymmane/l10n/catalog_vi.dart';
 import 'package:gymmane/l10n/l10n.dart';
 import 'package:gymmane/models/exercise.dart';
 import 'package:gymmane/services/local_store.dart';
@@ -65,7 +66,7 @@ void main() {
     await Store.instance.init();
     fit.loadFromStore();
     final phone = PlatformDispatcher.instance.locale.languageCode.toLowerCase();
-    expect(fit.language, phone == 'es' ? 'es' : 'en');
+    expect(fit.language, phone == 'es' ? 'es' : 'vi');
   });
 
   test('a chosen language always beats the phone one', () async {
@@ -256,6 +257,38 @@ void main() {
     });
   });
 
+  group('catálogo en vietnamita', () {
+    test('every factory exercise has a Vietnamese name', () {
+      final missing = kExercises.where((e) => !kExerciseNameVi.containsKey(e.id)).map((e) => e.name);
+      expect(missing, isEmpty);
+    });
+
+    test('every factory exercise has Vietnamese steps', () {
+      final missing = kExercises.where((e) => !kExerciseStepsVi.containsKey(e.id)).map((e) => e.name);
+      expect(missing, isEmpty);
+    });
+
+    test('Vietnamese steps line up one-to-one with English ones', () {
+      final bad = <String>[];
+      for (final e in kExercises) {
+        final vi = kExerciseStepsVi[e.id];
+        if (vi == null) continue;
+        if (vi.length != e.steps.length) bad.add('${e.name}: ${vi.length} vs ${e.steps.length}');
+        for (final s in vi) {
+          if (s.trim().isEmpty) bad.add('${e.name}: bước rỗng');
+        }
+      }
+      expect(bad, isEmpty);
+    });
+
+    test('steps follow Vietnamese language', () {
+      final bench = kExercises.firstWhere((e) => e.id == 'EIeI8Vf');
+      setAppLanguage('vi');
+      expect(exerciseSteps(bench), isNot(bench.steps));
+      expect(exerciseSteps(bench).first, contains('ghế'));
+    });
+  });
+
   test('every tool is named and described in Spanish', () {
     setAppLanguage('es');
     for (final tool in kToolMeta) {
@@ -289,7 +322,7 @@ void main() {
 
     bool looksLikeUi(String t) => RegExp(r'^[A-Z]').hasMatch(t) || t.contains(' ');
 
-    const allowed = {'GymMane', 'GYMMANE', 'GYM · MANE', 'M', 'F', 'kg', 'lb', 'cm', 'EN', 'ES'};
+    const allowed = {'FitMan', 'FITMAN', 'GYM · MANE', 'M', 'F', 'kg', 'lb', 'cm', 'EN', 'ES'};
 
     final offenders = <String>[];
 

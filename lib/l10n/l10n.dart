@@ -5,15 +5,26 @@ import 'package:intl/intl.dart';
 import 'app_localizations.dart';
 import 'catalog_es.dart';
 import 'catalog_it.dart';
+import 'catalog_vi.dart';
 import 'catalog_zh.dart';
 
 export 'app_localizations.dart';
 
-const Map<String, Map<String, String>> _catalogNames = {'es': kExerciseNameEs, 'it': kExerciseNameIt, 'zh': kExerciseNameZh};
-const Map<String, Map<String, List<String>>> _catalogSteps = {'es': kExerciseStepsEs, 'it': kExerciseStepsIt, 'zh': kExerciseStepsZh};
+const Map<String, Map<String, String>> _catalogNames = {
+  'es': kExerciseNameEs,
+  'it': kExerciseNameIt,
+  'vi': kExerciseNameVi,
+  'zh': kExerciseNameZh,
+};
+const Map<String, Map<String, List<String>>> _catalogSteps = {
+  'es': kExerciseStepsEs,
+  'it': kExerciseStepsIt,
+  'vi': kExerciseStepsVi,
+  'zh': kExerciseStepsZh,
+};
 
-String appLanguage = 'en';
-AppLocalizations t = lookupAppLocalizations(const Locale('en'));
+String appLanguage = 'vi';
+AppLocalizations t = lookupAppLocalizations(const Locale('vi'));
 
 String _codeOf(Locale l) => l.scriptCode == null ? l.languageCode : '${l.languageCode}_${l.scriptCode}';
 
@@ -100,6 +111,9 @@ extension GymL10n on AppLocalizations {
       };
 
   String templateBlurb(String id) => switch (id) {
+        'beginner_friendly' => '${"Giáo án tối ưu cho người mới bắt đầu: an toàn, thân thiện, dùng máy và tạ đơn tránh chấn thương."}',
+        'fullbody_ab' => '${"Phân kỳ chu kỳ A/B luân phiên, tối ưu phát triển cơ bắp toàn diện."}',
+        'ppl_6day' => '${"Lịch tập 6 buổi/tuần cường độ cao cho vận động viên thể hình nâng cao."}',
         'fullbody' => tplFullbody,
         'ppl' => tplPpl,
         'upperlower' => tplUpperlower,

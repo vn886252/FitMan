@@ -1,14 +1,14 @@
 <div align="center">
 
-<img src="docs/screenshots/banner-en.png" alt="GymMane — Lift. Log it. Grow." width="860" />
+<img src="docs/screenshots/banner-en.png" alt="FitMan — Lift. Log it. Grow." width="860" />
 
 <br/>
 
-<img src="docs/screenshots/icon.png" width="94" alt="GymMane" />
+<img src="docs/screenshots/icon.png" width="94" alt="FitMan" />
 
-# GymMane
+# FitMan
 
-A free, offline gym log for Android.<br/>
+A free, offline gym log for Android & iOS.<br/>
 Tap the muscles you want to train, log your sets and watch your numbers go up.
 
 <br/>
@@ -159,7 +159,7 @@ take the `arm64-v8a` APK if you're not sure which one you need.
 
 ## Privacy
 
-No account, no ads and no analytics. GymMane doesn't even have the internet
+No account, no ads and no analytics. FitMan doesn't even have the internet
 permission, so your training stays on your phone. The permissions it does ask
 for are for the rest timer, its notification and the widgets.
 
@@ -178,7 +178,7 @@ flutter build apk --release
 
 ## Support
 
-GymMane is free and will stay that way. A star, a translation or a clear bug
+FitMan is free and will stay that way. A star, a translation or a clear bug
 report helps a lot. If you want to buy me a coffee:
 
 <div align="center">

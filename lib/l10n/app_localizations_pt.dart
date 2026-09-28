@@ -387,7 +387,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String hoursShort(int n) {
+  String hoursShort(int n, Object h) {
     return '${n}h';
   }
 
@@ -1295,8 +1295,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get importBackup => 'Importar backup';
 
   @override
-  String get importHint =>
-      'Escolha um backup .json exportado do GymMane. Isso substituirá seus dados atuais.';
+  String get importHint => 'Escolha um backup .json exportado do FitMan. Isso substituirá seus dados atuais.';
 
   @override
   String get import => 'Importar';
@@ -1348,7 +1347,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get aboutGymmane => 'Sobre GymMane';
+  String get aboutGymmane => 'Sobre FitMan';
 
   @override
   String get yourProfile => 'SEU PERFIL';
@@ -2121,7 +2120,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get aiIntro =>
-      'O GymMane não fala com nenhuma IA. Tu tiras a tua lista de exercícios, colas no assistente que já usas e trazes a resposta de volta. Do telemóvel não sai nada sozinho.';
+      'O FitMan não fala com nenhuma IA. Tu tiras a tua lista de exercícios, colas no assistente que já usas e trazes a resposta de volta. Do telemóvel não sai nada sozinho.';
 
   @override
   String get aiStep1 =>
@@ -2160,7 +2159,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get awardFirstStepName => 'Primeiro passo';
 
   @override
-  String get awardFirstStepLine => 'Bem-vindo ao GymMane. Esta é por conta da casa.';
+  String get awardFirstStepLine => 'Bem-vindo ao FitMan. Esta é por conta da casa.';
 
   @override
   String get awardFirstWorkoutName => 'Primeiro treino';
@@ -2758,7 +2757,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String shareMessage(String name) {
-    return '$name — abra o arquivo com o GymMane para adicionar.';
+    return '$name — abra o arquivo com o FitMan para adicionar.';
   }
 
   @override
@@ -2766,7 +2765,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get importPasteHint =>
-      'Cole aqui uma rotina: uma compartilhada do GymMane, a resposta de uma IA, JSON ou CSV.';
+      'Cole aqui uma rotina: uma compartilhada do FitMan, a resposta de uma IA, JSON ou CSV.';
 
   @override
   String get pasteAction => 'Colar';
@@ -2798,10 +2797,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get nothingToImport => 'Não há nada aqui que o GymMane possa importar';
+  String get nothingToImport => 'Não há nada aqui que o FitMan possa importar';
 
   @override
-  String get aiStepCopy => 'Copie o pedido. Ele leva sua lista de exercícios e o formato que o GymMane lê.';
+  String get aiStepCopy => 'Copie o pedido. Ele leva sua lista de exercícios e o formato que o FitMan lê.';
 
   @override
   String get aiStepAsk =>
@@ -2943,7 +2942,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get shareIntroBody =>
-      'Envie para seu par, um amigo ou sua família. Eles recebem um arquivo pequeno que abre no GymMane e adiciona a rotina com um toque, com séries e pesos.';
+      'Envie para seu par, um amigo ou sua família. Eles recebem um arquivo pequeno que abre no FitMan e adiciona a rotina com um toque, com séries e pesos.';
 
   @override
   String get removedFromRoutine => 'Removido da rotina';
@@ -2992,4 +2991,19 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get gamificationSetting => 'Medalhas e níveis';
+
+  @override
+  String get vietnameseMealsTitle => 'VIETNAMESE MEALS';
+
+  @override
+  String get vietnameseMealsDesc => 'Fitness nutrition tailored for Vietnamese cuisine';
+
+  @override
+  String get vietnameseMealsHomeTitle => 'Today\'s Vietnamese meals';
+
+  @override
+  String get vietnameseMealsHomeSub => 'Pho, broken rice, chicken breast... Track and count macros';
+
+  @override
+  String get viewMeals => 'View meals';
 }

@@ -73,7 +73,7 @@ class HeatmapWidgetView extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: Text('GymMane',
+                  child: Text('FitMan',
                       maxLines: 1,
                       overflow: TextOverflow.clip,
                       softWrap: false,
@@ -160,12 +160,16 @@ class StatsWidgetView extends StatelessWidget {
             children: [
               Icon(Icons.local_fire_department_rounded, size: 16, color: gc.accent),
               const SizedBox(width: 4),
-              Text(titleCase(t.streakCaps),
-                  style: TextStyle(
-                      fontFamily: _kDisplay,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: gc.text)),
+              Expanded(
+                child: Text(titleCase(t.streakCaps),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontFamily: _kDisplay,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: gc.text)),
+              ),
             ],
           ),
           const SizedBox(height: 14),

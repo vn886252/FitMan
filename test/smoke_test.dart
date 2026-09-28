@@ -45,6 +45,7 @@ void main() {
     'note-edit',
     'measures',
     'timeline',
+    'meals',
   ]) {
     testWidgets('$route draws without blowing up', (tester) async {
       await visit(tester, route);

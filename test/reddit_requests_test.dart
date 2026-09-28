@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gymmane/catalog/program_templates.dart';
+import 'package:gymmane/l10n/l10n.dart';
 import 'package:gymmane/models/live_session.dart';
 import 'package:gymmane/models/workout.dart';
 import 'package:gymmane/services/local_store.dart';
@@ -14,6 +15,7 @@ void main() {
     await Store.instance.init();
     fit.resetAllData();
     fit.setUnits('kg');
+    setAppLanguage('en');
   });
 
   String bench() => fit.matchExerciseByName('Barbell Bench Press')!.id;

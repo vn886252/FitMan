@@ -56,9 +56,9 @@ class FitState extends FitCore
       }
 
       themePref = _themeFrom(data, fallback: 'dark');
-      units = data['units'] as String? ?? 'kg';
+      units = (data['units'] as String?) ?? 'kg';
 
-      _applyLanguage(data['language'] as String? ?? language);
+      _applyLanguage(data['language'] as String? ?? 'vi');
       restSeconds = (data['rest'] as num?)?.toInt() ?? 90;
       alarmSound = data['alarmSound'] as String?;
       alarmSoundName = data['alarmSoundName'] as String?;
@@ -617,7 +617,7 @@ class FitState extends FitCore
   String planRequestText() {
     final here = allExercises.where(fitsHere).toList();
     final lines = <String>[
-      'GymMane · ${activePlace?.name ?? t.placeAll}',
+      'FitMan · ${activePlace?.name ?? t.placeAll}',
       t.planIntro,
       t.planFormat,
       planTemplate,

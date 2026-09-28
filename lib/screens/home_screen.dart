@@ -37,6 +37,10 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
             _hero(context, gc),
             const SizedBox(height: 14),
+            _periodizationCard(gc),
+            const SizedBox(height: 14),
+            _mealsCard(gc),
+            const SizedBox(height: 14),
             _weekCard(context, gc),
             if (fit.photoDue) ...[
               const SizedBox(height: 14),
@@ -163,6 +167,133 @@ class HomeScreen extends StatelessWidget {
           if (onMore != null)
             Icon(PhosphorIconsBold.caretRight, size: 14, color: gc.textTertiary),
         ],
+      ),
+    );
+  }
+
+  Widget _mealsCard(GymColors gc) {
+    return SoftCard(
+      radius: 22,
+      padding: const EdgeInsets.all(16),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: fit.goMeals,
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: gc.accentSoft,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Center(
+                child: Text('🍲', style: TextStyle(fontSize: 26)),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(t.vietnameseMealsHomeTitle,
+                      style: AppTheme.f(15.5, weight: FontWeight.w800, color: gc.text)),
+                  const SizedBox(height: 3),
+                  Text(t.vietnameseMealsHomeSub,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTheme.s(12, color: gc.textSecondary)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: gc.accent,
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Text(t.viewMeals,
+                  style: AppTheme.f(11.5, weight: FontWeight.w800, color: gc.bg)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _periodizationCard(GymColors gc) {
+    final isDeload = fit.isDeloadRecommended;
+    return SoftCard(
+      radius: 22,
+      padding: const EdgeInsets.all(16),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: fit.goRoutines,
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: isDeload ? Colors.amber.withValues(alpha: 0.18) : gc.accentSoft,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Icon(
+                  isDeload ? PhosphorIconsFill.batteryCharging : PhosphorIconsFill.chartLineUp,
+                  color: isDeload ? Colors.amber.shade700 : gc.accent,
+                  size: 26,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'CHU KỲ MESOCYCLE · TUẦN ${fit.currentCycleWeek}/6',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTheme.f(10.5,
+                              weight: FontWeight.w800,
+                              color: isDeload ? Colors.amber.shade700 : gc.accent,
+                              letterSpacing: 1.2),
+                        ),
+                      ),
+                      if (isDeload) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade700,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text('${"DELOAD"}',
+                              style: const TextStyle(
+                                  fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.white)),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    fit.currentCyclePhase,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTheme.f(14, weight: FontWeight.w800, color: gc.text),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(PhosphorIconsBold.caretRight, size: 16, color: gc.textTertiary),
+          ],
+        ),
       ),
     );
   }

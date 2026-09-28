@@ -1,11 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gymmane/app/gymmane_app.dart';
+import 'package:gymmane/l10n/l10n.dart';
 import 'package:gymmane/state/fit_state.dart';
 
 void main() {
   testWidgets('selecting a muscle updates the Train screen immediately', (tester) async {
 
     fit.onboarded = true;
+    setAppLanguage('en');
+    fit.language = 'en';
     fit.route = 'train';
     fit.trainStep = 'select';
     fit.selectedMuscles.clear();

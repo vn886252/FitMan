@@ -386,7 +386,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String hoursShort(int n) {
+  String hoursShort(int n, Object h) {
     return '$n sa';
   }
 
@@ -1295,7 +1295,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get importHint =>
-      'GymMane\'den dışa aktarılmış bir .zip (veya eski .json) yedeği seç. Mevcut verilerin, medya dahil, değiştirilecek.';
+      'FitMan\'den dışa aktarılmış bir .zip (veya eski .json) yedeği seç. Mevcut verilerin, medya dahil, değiştirilecek.';
 
   @override
   String get import => 'İçe aktar';
@@ -1347,7 +1347,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get aboutGymmane => 'GymMane hakkında';
+  String get aboutGymmane => 'FitMan hakkında';
 
   @override
   String get yourProfile => 'PROFİLİN';
@@ -1972,7 +1972,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get planNothing => 'Bu dosyadaki hiçbir egzersiz kütüphanenle eşleşmiyor';
 
   @override
-  String get planFailed => 'Bu dosya GymMane\'in okuyabileceği bir program değil';
+  String get planFailed => 'Bu dosya FitMan\'in okuyabileceği bir program değil';
 
   @override
   String get routineGroup => 'Grup';
@@ -2124,7 +2124,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get aiIntro =>
-      'GymMane hiçbir zaman doğrudan bir yapay zekâyla iletişim kurmaz. Egzersiz listesini dışa aktarır, kullandığın asistana yapıştırır ve yanıtını yeniden içe aktarırsın. Hiçbir şey kendiliğinden telefondan çıkmaz.';
+      'FitMan hiçbir zaman doğrudan bir yapay zekâyla iletişim kurmaz. Egzersiz listesini dışa aktarır, kullandığın asistana yapıştırır ve yanıtını yeniden içe aktarırsın. Hiçbir şey kendiliğinden telefondan çıkmaz.';
 
   @override
   String get aiStep1 =>
@@ -2163,7 +2163,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get awardFirstStepName => 'İlk adım';
 
   @override
-  String get awardFirstStepLine => 'GymMane\'e hoş geldin. Bu bizden.';
+  String get awardFirstStepLine => 'FitMan\'e hoş geldin. Bu bizden.';
 
   @override
   String get awardFirstWorkoutName => 'İlk antrenman';
@@ -2759,7 +2759,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String shareMessage(String name) {
-    return '$name — eklemek için dosyayı GymMane ile aç.';
+    return '$name — eklemek için dosyayı FitMan ile aç.';
   }
 
   @override
@@ -2767,7 +2767,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get importPasteHint =>
-      'Buraya bir rutin yapıştır: GymMane\'den paylaşılan, bir yapay zekâ yanıtı, JSON veya CSV.';
+      'Buraya bir rutin yapıştır: FitMan\'den paylaşılan, bir yapay zekâ yanıtı, JSON veya CSV.';
 
   @override
   String get pasteAction => 'Yapıştır';
@@ -2799,10 +2799,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get nothingToImport => 'Burada GymMane\'in içe aktarabileceği bir şey yok';
+  String get nothingToImport => 'Burada FitMan\'in içe aktarabileceği bir şey yok';
 
   @override
-  String get aiStepCopy => 'İsteği kopyala. Egzersiz listeni ve GymMane\'in okuduğu biçimi içerir.';
+  String get aiStepCopy => 'İsteği kopyala. Egzersiz listeni ve FitMan\'in okuduğu biçimi içerir.';
 
   @override
   String get aiStepAsk =>
@@ -2945,7 +2945,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get shareIntroBody =>
-      'Partnerine, bir arkadaşına ya da ailene gönder. GymMane ile açılan küçük bir dosya alırlar; setleri ve ağırlıklarıyla tek dokunuşta eklenir.';
+      'Partnerine, bir arkadaşına ya da ailene gönder. FitMan ile açılan küçük bir dosya alırlar; setleri ve ağırlıklarıyla tek dokunuşta eklenir.';
 
   @override
   String get removedFromRoutine => 'Rutinden çıkarıldı';
@@ -2994,4 +2994,19 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get gamificationSetting => 'Madalyalar ve seviyeler';
+
+  @override
+  String get vietnameseMealsTitle => 'VIETNAMESE MEALS';
+
+  @override
+  String get vietnameseMealsDesc => 'Fitness nutrition tailored for Vietnamese cuisine';
+
+  @override
+  String get vietnameseMealsHomeTitle => 'Today\'s Vietnamese meals';
+
+  @override
+  String get vietnameseMealsHomeSub => 'Pho, broken rice, chicken breast... Track and count macros';
+
+  @override
+  String get viewMeals => 'View meals';
 }

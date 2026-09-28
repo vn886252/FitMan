@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,7 +35,7 @@ import '../widgets/timer_panel.dart';
 import 'profile_screen.dart';
 import '../widgets/ui_kit.dart';
 
-const _kRepoUrl = 'https://github.com/InlitX/GymMane';
+const _kRepoUrl = 'https://github.com/vn886252/FitMan';
 const _kBugUrl = '$_kRepoUrl/issues/new?labels=bug';
 const _kFeatureUrl = '$_kRepoUrl/issues/new?labels=enhancement';
 const _kKofiUrl = 'https://ko-fi.com/inlitx';
@@ -98,10 +98,23 @@ class SettingsScreen extends StatelessWidget {
                       ]),
                     ),
                   ),
-                  _prefRow(gc, PhosphorIconsRegular.scales, t.unitsLabel, SegToggle([
-                    SegOption('kg', fit.units == 'kg', () => fit.setUnits('kg')),
-                    SegOption('lb', fit.units == 'lb', () => fit.setUnits('lb')),
-                  ])),
+                  _prefRow(
+                    gc,
+                    PhosphorIconsRegular.scales,
+                    t.unitsLabel,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: gc.accent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(color: gc.accent.withValues(alpha: 0.35)),
+                      ),
+                      child: Text(
+                        '${fit.units}',
+                        style: AppTheme.f(13, weight: FontWeight.w700, color: gc.accent),
+                      ),
+                    ),
+                  ),
                   _prefRow(
                     gc,
                     PhosphorIconsRegular.timer,
@@ -267,7 +280,7 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            if (Platform.isAndroid || Platform.isIOS) ...[
+            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) ...[
               _sectionLabel(gc, t.homeWidgets),
               const SizedBox(height: 8),
               _linkGroup(gc, [
@@ -483,7 +496,7 @@ class SettingsScreen extends StatelessWidget {
     await file.writeAsString(fit.exportCsv());
     if (!context.mounted) return;
     await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], subject: 'GymMane workouts'),
+      ShareParams(files: [XFile(file.path)], subject: 'FitMan workouts'),
     );
   }
 
@@ -506,7 +519,7 @@ class SettingsScreen extends StatelessWidget {
     await file.writeAsBytes(await buildBackupZip(), flush: true);
     if (!context.mounted) return;
     await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], subject: 'GymMane backup'),
+      ShareParams(files: [XFile(file.path)], subject: 'FitMan backup'),
     );
   }
 
@@ -1297,6 +1310,24 @@ class _ProfileSheetState extends State<_ProfileSheet> {
             ),
             const SizedBox(height: 16),
             _row(gc, t.pickBadge, _badgeDots(gc)),
+            const SizedBox(height: 12),
+            _row(
+              gc,
+              '${"Cấp độ tập gym"}',
+              DropdownButton<String>(
+                value: p.experienceLevel,
+                dropdownColor: gc.bgRaised,
+                underline: const SizedBox(),
+                items: [
+                  DropdownMenuItem(value: 'beginner', child: Text('${"🌱 Người mới"}', style: AppTheme.f(13, color: gc.text))),
+                  DropdownMenuItem(value: 'intermediate', child: Text('${"⚡ Trung cấp"}', style: AppTheme.f(13, color: gc.text))),
+                  DropdownMenuItem(value: 'advanced', child: Text('${"🏆 Chuyên nghiệp"}', style: AppTheme.f(13, color: gc.text))),
+                ],
+                onChanged: (v) {
+                  if (v != null) _up(() => fit.updateProfile(experienceLevel: v));
+                },
+              ),
+            ),
             const SizedBox(height: 12),
             _row(gc, t.sexLabel, SegToggle([
               SegOption(t.male, p.sex == 'male', () => _up(() => fit.updateProfile(sex: 'male'))),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 import '../catalog/exercise_catalog.dart';
@@ -75,8 +76,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       _welcome(gc),
                       _nameStep(gc),
-                      _unitsStep(gc),
                       _bodyStep(gc),
+                      _experienceStep(gc),
                       _goalStep(gc),
                       _placeStep(gc),
                     ],
@@ -257,7 +258,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 2,
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text('GymMane',
+                  child: Text('FitMan',
                       style: AppTheme.f(44, weight: FontWeight.w800, color: gc.text, height: 1)),
                 ),
               ),
@@ -346,7 +347,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final p = fit.profile;
     return _step(
       gc,
-      step: 3,
+      step: 2,
       title: t.onbBodyTitle,
       why: t.onbBodyWhy,
       child: _group(gc, [
@@ -407,6 +408,144 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Widget _experienceStep(GymColors gc) {
+    final p = fit.profile;
+    final expTitle = '${"Kinh nghiệm tập luyện"}';
+    final expWhy = '${"FitMan sẽ sắp xếp bài tập và mức tạ vừa sức, an toàn nhất cho bạn."}';
+
+    return _step(
+      gc,
+      step: 3,
+      title: expTitle,
+      why: expWhy,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _expOptionCard(
+            gc,
+            key: 'beginner',
+            icon: '🌱',
+            title: '${"Người mới bắt đầu"}',
+            badge: '${"< 6 tháng"}',
+            desc: '${"Chưa có kinh nghiệm gym. Ưu tiên máy tập (Machine) và tạ đơn dễ tập, an toàn cột sống & khớp."}',
+            isSel: p.isBeginner,
+          ),
+          const SizedBox(height: 12),
+          _expOptionCard(
+            gc,
+            key: 'intermediate',
+            icon: '⚡',
+            title: '${"Đã có kinh nghiệm"}',
+            badge: '${"6 tháng - 2 năm"}',
+            desc: '${"Nắm vững kỹ thuật cơ bản. Phối hợp tạ đòn (Barbell), tạ đơn & cáp để tăng cơ bắp toàn diện."}',
+            isSel: p.isIntermediate,
+          ),
+          const SizedBox(height: 12),
+          _expOptionCard(
+            gc,
+            key: 'advanced',
+            icon: '🏆',
+            title: '${"Chuyên nghiệp / Nâng cao"}',
+            badge: '${"2+ năm"}',
+            desc: '${"Thành thạo kỹ thuật tạ nặng compound. Cần phân kỳ chu kỳ (Periodization), volume & RPE cao."}',
+            isSel: p.isAdvanced,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _expOptionCard(
+    GymColors gc, {
+    required String key,
+    required String icon,
+    required String title,
+    required String badge,
+    required String desc,
+    required bool isSel,
+  }) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        _up(() => fit.updateProfile(experienceLevel: key));
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSel ? gc.ember.withValues(alpha: 0.12) : gc.bgRaised,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isSel ? gc.ember : gc.border,
+            width: isSel ? 1.8 : 1,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isSel ? gc.ember : gc.bgRaised2,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(child: Text('${icon}', style: const TextStyle(fontSize: 22))),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${title}',
+                          style: AppTheme.f(
+                            15,
+                            weight: FontWeight.w800,
+                            color: isSel ? gc.ember : gc.text,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                        decoration: BoxDecoration(
+                          color: isSel ? gc.ember : gc.bgRaised2,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '${badge}',
+                          style: AppTheme.f(
+                            10.5,
+                            weight: FontWeight.w700,
+                            color: isSel ? gc.onEmber : gc.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    '${desc}',
+                    style: AppTheme.s(
+                      12,
+                      weight: FontWeight.w500,
+                      color: isSel ? gc.text : gc.textSecondary,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _goalStep(GymColors gc) {
     final goal = fit.profile.weeklyGoal;
     return _step(
@@ -454,67 +593,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _unitsStep(GymColors gc) {
-    return _step(
-      gc,
-      step: 2,
-      title: t.onbUnitsTitle,
-      why: t.autofills,
-      child: Row(
-        children: [
-          for (final u in const ['kg', 'lb']) ...[
-            if (u == 'lb') const SizedBox(width: 12),
-            Expanded(child: _unitTile(gc, u)),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _unitTile(GymColors gc, String u) {
-    final on = fit.units == u;
-    final sample = u == 'kg' ? '60 kg · 175 cm · 5 km' : '135 lb · 5′9″ · 3 mi';
-    return Semantics(
-      button: true,
-      selected: on,
-      label: u,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _up(() => fit.setUnits(u)),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          height: 118,
-          padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
-          decoration: BoxDecoration(
-            color: gc.bgRaised,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: on ? gc.ember : Colors.transparent, width: 1.6),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Spacer(),
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 200),
-                    opacity: on ? 1 : 0,
-                    child: Icon(PhosphorIconsFill.checkCircle, size: 18, color: gc.ember),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Text(u, style: AppTheme.f(30, weight: FontWeight.w800, color: on ? gc.ember : gc.text, height: 1)),
-              const SizedBox(height: 6),
-              Text(sample, style: AppTheme.f(11.5, weight: FontWeight.w600, color: gc.textTertiary)),
-            ],
-          ),
         ),
       ),
     );
