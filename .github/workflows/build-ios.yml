@@ -14,11 +14,21 @@ on:
 jobs:
   build-ios:
     name: Build FitMan iOS (.ipa)
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Select Xcode 16 (Swift 6)
+        run: |
+          XCODE_APP=$(find /Applications -maxdepth 1 -name 'Xcode_16*.app' | sort -V | tail -n 1)
+          if [ -n "$XCODE_APP" ]; then
+            echo "Selecting $XCODE_APP"
+            sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          fi
+          xcodebuild -version
+          swift --version
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -35,11 +45,12 @@ jobs:
       - name: Build iOS App (Unsigned IPA)
         run: |
           flutter build ios --release --no-codesign
+          mkdir -p build/ios/iphoneos/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
           cd build/ios/iphoneos
-          mkdir -p Payload
-          cp -r Runner.app Payload/
           zip -r -q FitMan-iOS.ipa Payload
-          mv FitMan-iOS.ipa ../../../
+          cd ../../../
+          cp build/ios/iphoneos/FitMan-iOS.ipa ./
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
