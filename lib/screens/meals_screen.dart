@@ -147,9 +147,6 @@ class _MealsScreenState extends State<MealsScreen> {
     return _eatenByDay[_selectedDay]?[mealId];
   }
 
-  bool _isEaten(String mealId) {
-    return _eatenByDay[_selectedDay]?.containsKey(mealId) ?? false;
-  }
 
   ({int cal, double pro, double carb, double fat}) _getEatenNutrition() {
     final eatenMap = _eatenByDay[_selectedDay] ?? <String, double>{};
@@ -485,7 +482,7 @@ class _MealsScreenState extends State<MealsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${"NƯỚC UỐNG MỤC TIÊU"}',
+                    Text('NƯỚC UỐNG MỤC TIÊU',
                         style: AppTheme.f(10.5,
                             weight: FontWeight.w800, color: Colors.blue.shade400, letterSpacing: 1.2)),
                     const SizedBox(height: 2),
@@ -519,7 +516,7 @@ class _MealsScreenState extends State<MealsScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(PhosphorIconsBold.plus, size: 14),
-                  label: Text('${"+250 ml"}'),
+                  label: const Text('+250 ml'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.blue.shade400,
                     side: BorderSide(color: Colors.blue.shade400.withValues(alpha: 0.4)),
@@ -533,7 +530,7 @@ class _MealsScreenState extends State<MealsScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(PhosphorIconsBold.plus, size: 14),
-                  label: Text('${"+500 ml"}'),
+                  label: const Text('+500 ml'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.blue.shade400,
                     side: BorderSide(color: Colors.blue.shade400.withValues(alpha: 0.4)),
@@ -902,7 +899,7 @@ class _MealsScreenState extends State<MealsScreen> {
               padding: const EdgeInsets.fromLTRB(56, 0, 16, 10),
               child: Row(
                 children: [
-                  Text('${"Khẩu phần:"} ',
+                  Text('Khẩu phần: ',
                       style: AppTheme.s(11, weight: FontWeight.w600, color: gc.textTertiary)),
                   const SizedBox(width: 6),
                   _portionChip(gc, opt.id, 0.5, portion),
