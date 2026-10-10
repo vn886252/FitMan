@@ -23,6 +23,20 @@ class _MealsScreenState extends State<MealsScreen> {
   static const _days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
   String _selectedDay = 'Thứ 2';
 
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _selectedCategory = 'all';
+
+  static const _categoryTabs = [
+    ('all', 'Tất cả', '✨'),
+    ('pre_workout', 'Trước tập', '⚡'),
+    ('post_workout', 'Sau tập', '💪'),
+    ('breakfast', 'Bữa sáng', '☀️'),
+    ('lunch', 'Bữa trưa', '🍲'),
+    ('dinner', 'Bữa tối', '🌙'),
+    ('snack', 'Bữa phụ', '🍌'),
+  ];
+
   // Map<Day, Map<MealId, PortionFactor>>
   Map<String, Map<String, double>> _eatenByDay = {};
   // Map<Day, WaterInMl>
@@ -33,6 +47,12 @@ class _MealsScreenState extends State<MealsScreen> {
     super.initState();
     _loadEatenMeals();
     _loadWater();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _loadEatenMeals() {
@@ -237,18 +257,12 @@ class _MealsScreenState extends State<MealsScreen> {
             _waterTrackerCard(gc, waterCurrent, targetWaterMl),
             const SizedBox(height: 22),
 
-            // Các danh mục bữa ăn thể hình
-            _mealCategorySection(gc, 'Bữa Trước Tập ⚡ (Pre-Workout)', 'pre_workout'),
-            const SizedBox(height: 16),
-            _mealCategorySection(gc, 'Bữa Sau Tập 💪 (Post-Workout)', 'post_workout'),
-            const SizedBox(height: 16),
-            _mealCategorySection(gc, 'Bữa Sáng ☀️ (Breakfast)', 'breakfast'),
-            const SizedBox(height: 16),
-            _mealCategorySection(gc, 'Bữa Trưa 🍲 (Lunch)', 'lunch'),
-            const SizedBox(height: 16),
-            _mealCategorySection(gc, 'Bữa Tối 🌙 (Dinner)', 'dinner'),
-            const SizedBox(height: 16),
-            _mealCategorySection(gc, 'Bữa Phụ 🍌 (Snack & Whey)', 'snack'),
+            // Thanh tìm kiếm món ăn & Bộ lọc danh mục
+            _searchAndFilterBar(gc),
+            const SizedBox(height: 18),
+
+            // Danh sách các món ăn thể hình
+            ..._buildMealSections(gc),
           ],
         ),
       ),
@@ -536,6 +550,205 @@ class _MealsScreenState extends State<MealsScreen> {
     );
   }
 
+  Widget _searchAndFilterBar(GymColors gc) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Ô tìm kiếm món ăn
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: gc.bgRaised,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: gc.border),
+          ),
+          child: Row(
+            children: [
+              Icon(PhosphorIconsRegular.magnifyingGlass, color: gc.textTertiary, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (val) {
+                    setState(() {
+                      _searchQuery = val.trim();
+                    });
+                  },
+                  style: AppTheme.f(13.5, weight: FontWeight.w600, color: gc.text),
+                  decoration: InputDecoration(
+                    hintText: 'Tìm kiếm món ăn (phở, bò, gà, yến mạch, tôm, cá...)',
+                    hintStyle: AppTheme.s(12, color: gc.textTertiary),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              if (_searchQuery.isNotEmpty)
+                GestureDetector(
+                  onTap: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = '';
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Icon(PhosphorIconsRegular.x, size: 15, color: gc.textTertiary),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Thanh cuộn chọn nhóm món ăn
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: _categoryTabs.map((tab) {
+              final isSel = _selectedCategory == tab.$1;
+              final count = tab.$1 == 'all'
+                  ? kVietnameseMeals.length
+                  : getVietnameseMealsByCategory(tab.$1).length;
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() {
+                      _selectedCategory = tab.$1;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: isSel ? gc.accent : gc.bgRaised,
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: isSel ? gc.accent : gc.border,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(tab.$3, style: const TextStyle(fontSize: 12)),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${tab.$2} ($count)',
+                          style: AppTheme.f(
+                            11.5,
+                            weight: isSel ? FontWeight.w800 : FontWeight.w600,
+                            color: isSel ? Colors.white : gc.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildMealSections(GymColors gc) {
+    if (_searchQuery.isNotEmpty) {
+      // Tìm kiếm theo từ khóa
+      var matches = searchVietnameseMeals(_searchQuery);
+      if (_selectedCategory != 'all') {
+        matches = matches.where((m) => m.category == _selectedCategory).toList();
+      }
+
+      if (matches.isEmpty) {
+        return [
+          SoftCard(
+            radius: 20,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+            child: Column(
+              children: [
+                Icon(PhosphorIconsRegular.magnifyingGlass, size: 36, color: gc.textTertiary),
+                const SizedBox(height: 12),
+                Text(
+                  'Không tìm thấy món nào với "$_searchQuery"',
+                  style: AppTheme.f(14, weight: FontWeight.w700, color: gc.text),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Hãy thử từ khóa ngắn hơn như "gà", "bò", "cơm", "trứng", "cá"...',
+                  style: AppTheme.s(12, color: gc.textTertiary),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ];
+      }
+
+      return [
+        SoftCard(
+          radius: 20,
+          padding: EdgeInsets.zero,
+          clip: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Kết quả tìm kiếm cho "$_searchQuery"',
+                        style: AppTheme.f(14.5, weight: FontWeight.w800, color: gc.text),
+                      ),
+                    ),
+                    Text(
+                      '${matches.length} món',
+                      style: AppTheme.s(12, weight: FontWeight.w700, color: gc.accent),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: gc.border.withValues(alpha: 0.6)),
+              ...matches.map((opt) {
+                final portion = _getPortion(opt.id);
+                final isEaten = portion != null && portion > 0;
+                return _mealRow(gc, opt, isEaten, portion ?? 1.0);
+              }),
+            ],
+          ),
+        ),
+      ];
+    }
+
+    // Hiển thị theo danh mục được chọn
+    final sections = <Widget>[];
+
+    void addSection(String title, String cat) {
+      if (_selectedCategory == 'all' || _selectedCategory == cat) {
+        if (sections.isNotEmpty) {
+          sections.add(const SizedBox(height: 16));
+        }
+        sections.add(_mealCategorySection(gc, title, cat));
+      }
+    }
+
+    addSection('Bữa Trước Tập ⚡ (Pre-Workout)', 'pre_workout');
+    addSection('Bữa Sau Tập 💪 (Post-Workout)', 'post_workout');
+    addSection('Bữa Sáng ☀️ (Breakfast)', 'breakfast');
+    addSection('Bữa Trưa 🍲 (Lunch)', 'lunch');
+    addSection('Bữa Tối 🌙 (Dinner)', 'dinner');
+    addSection('Bữa Phụ 🍌 (Snack & Whey)', 'snack');
+
+    return sections;
+  }
+
   Widget _mealCategorySection(GymColors gc, String title, String category) {
     final options = getVietnameseMealsByCategory(category);
 
@@ -659,6 +872,22 @@ class _MealsScreenState extends State<MealsScreen> {
                                 style: AppTheme.s(11, weight: FontWeight.w500, color: gc.textSecondary)),
                           ],
                         ),
+                        if (opt.note != null && opt.note!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: gc.accent.withValues(alpha: 0.09),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '💡 ${opt.note!}',
+                              style: AppTheme.s(10, weight: FontWeight.w600, color: gc.accent),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
