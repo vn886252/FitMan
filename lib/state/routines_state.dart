@@ -250,4 +250,23 @@ mixin RoutinesState on FitCore, LibraryState {
     route = 'routines';
     notifyListeners();
   }
+
+  void swapRoutineExercise(String routineId, String oldId, String newId) {
+    final r = _routine(routineId);
+    if (r == null) return;
+    final idx = r.exerciseIds.indexOf(oldId);
+    if (idx == -1) return;
+    r.exerciseIds[idx] = newId;
+    if (r.sets.containsKey(oldId)) {
+      r.sets[newId] = r.sets.remove(oldId)!;
+    }
+    if (r.plan.containsKey(oldId)) {
+      r.plan[newId] = r.plan.remove(oldId)!;
+    }
+    if (r.chained.remove(oldId)) {
+      r.chained.add(newId);
+    }
+    _persist();
+    notifyListeners();
+  }
 }

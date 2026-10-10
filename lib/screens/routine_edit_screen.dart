@@ -419,6 +419,160 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
     );
   }
 
+  void _swapRoutineExerciseSheet(Exercise current) {
+    final gc = context.gc;
+    final alternatives = fit.allExercises.where((e) {
+      if (e.id == current.id) return false;
+      if (e.primary != current.primary) return false;
+      return fit.suggests(e.id);
+    }).toList()
+      ..sort((a, b) => fit.rankExerciseForProfile(a).compareTo(fit.rankExerciseForProfile(b)));
+
+    showAppSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheet) => Container(
+        padding: sheetPad(sheet),
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheet).height * 0.75),
+        decoration: BoxDecoration(
+          color: gc.bgRaised,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SheetHandle(),
+            const SizedBox(height: 16),
+            Text(
+              '${"Gợi ý bài tập thay thế"}',
+              style: AppTheme.f(18, weight: FontWeight.w800, color: gc.text),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${"Cùng nhóm cơ: "} ${muscleLabel(current.primary)} · ${"Chạm để đổi bài"}',
+              style: AppTheme.f(12, weight: FontWeight.w500, color: gc.textSecondary),
+            ),
+            const SizedBox(height: 14),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.only(bottom: 16),
+                itemCount: alternatives.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 8),
+                itemBuilder: (context, i) {
+                  final item = alternatives[i];
+                  final isSafe = fit.rankExerciseForProfile(item) <= 2;
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      fit.swapRoutineExercise(_id, current.id, item.id);
+                      Navigator.of(context).pop();
+                      showNotchToast(
+                        context,
+                        '${"Đã đổi bài tập thành"}',
+                        subtitle: exerciseName(item),
+                        icon: PhosphorIconsRegular.arrowsClockwise,
+                        accent: gc.accent,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: gc.bgRaised2,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSafe ? gc.accent.withValues(alpha: 0.3) : gc.border,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        exerciseName(item),
+                                        style: AppTheme.f(14, weight: FontWeight.w700, color: gc.text),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (isSafe) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: gc.accent.withValues(alpha: 0.16),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          '${"Khuyên dùng"}',
+                                          style: AppTheme.f(10, weight: FontWeight.w700, color: gc.accent),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: gc.bg,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        t.equipment(item.equipment),
+                                        style: AppTheme.f(11, weight: FontWeight.w600, color: gc.textSecondary),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: gc.bg,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        t.difficulty(item.difficulty),
+                                        style: AppTheme.f(11, weight: FontWeight.w600, color: gc.textTertiary),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                            width: 32,
+                            height: 32,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: gc.accent.withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(PhosphorIconsRegular.swap, size: 16, color: gc.accent),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _shareIntro(Routine routine) {
     showAppSheet<void>(
       context: context,
@@ -616,6 +770,21 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
               ),
             ),
           ),
+        Semantics(
+          button: true,
+          label: '${"Đổi bài tương tự"}',
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _swapRoutineExerciseSheet(ex),
+            child: SizedBox(
+              width: 38,
+              height: 44,
+              child: Center(
+                child: Icon(PhosphorIconsRegular.arrowsClockwise, size: 17, color: gc.textTertiary),
+              ),
+            ),
+          ),
+        ),
         Semantics(
           button: true,
           label: t.removeFromRoutine,

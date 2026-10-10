@@ -95,76 +95,106 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
 
   static const _pickTarget = 6;
 
+  int rankExerciseForProfile(Exercise e) {
+    if (favorites[e.id] == true) return 0;
+    if (exerciseHistory(e.id).isNotEmpty) return 1;
+    final eq = e.equipment.toLowerCase();
+    final name = e.name.toLowerCase();
+
+    // Các bài tập rủi ro cao cho cột sống / khớp hoặc kỹ thuật cử tạ Olympic phức tạp:
+    // Tuyệt đối không sắp xếp tự động cho người mới hoặc người 6 tháng kinh nghiệm.
+    final isHighRiskOrExotic = name.contains('good morning') ||
+        name.contains('snatch') ||
+        name.contains('clean') ||
+        name.contains('behind the neck') ||
+        name.contains('behind neck') ||
+        name.contains('zercher') ||
+        name.contains('sissy') ||
+        name.contains('jefferson') ||
+        name.contains('pistol squat') ||
+        name.contains('straight leg deadlift');
+
+    if (isHighRiskOrExotic) {
+      if (!profile.isAdvanced) return 99;
+      return 8;
+    }
+
+    final isCardioOrHIIT = eq == 'cardio' ||
+        name.contains('run') ||
+        name.contains('cycle') ||
+        name.contains('rowing') ||
+        name.contains('jump') ||
+        name.contains('burpee') ||
+        name.contains('plank') ||
+        name.contains('hiit');
+
+    final isMassBuilder = (eq == 'barbell' || eq == 'dumbbell') &&
+        (name.contains('press') ||
+            name.contains('squat') ||
+            name.contains('deadlift') ||
+            name.contains('row') ||
+            name.contains('curl') ||
+            name.contains('pull up'));
+
+    if (profile.isCutting) {
+      // Người thừa cân / giảm mỡ: ưu tiên bài tiêu hao năng lượng cao, cardio, máy tập toàn thân
+      if (isCardioOrHIIT) return 2;
+      if (eq == 'machine' || eq == 'cable') return 3;
+    } else if (profile.isBulking) {
+      // Người thiếu cân / tăng cân: ưu tiên bài xây khối cơ tạ nặng (Mass Compound), tránh tiêu hao calo quá mức từ cardio
+      if (isCardioOrHIIT) return 6;
+      if (isMassBuilder) return 2;
+    }
+
+    if (profile.isBeginner) {
+      // Cho người mới: ưu tiên máy tập (Machine), cáp (Cable), tạ đơn (Dumbbell), bodyweight
+      // Tránh các bài kỹ thuật phức tạp hoặc áp lực cột sống lớn (Deadlift, Barbell Squat)
+      final isHard = name.contains('deadlift') ||
+          (eq == 'barbell' && (name.contains('squat') || name.contains('row')));
+      final isBeginnerFriendly = eq == 'machine' || eq == 'cable' || eq == 'dumbbell' || eq == 'bodyweight';
+      if (isBeginnerFriendly && !isHard) return 2;
+      if (isHard) return 6;
+      return 3;
+    } else if (profile.isIntermediate) {
+      // Cho người 6 tháng kinh nghiệm: ưu tiên bài tập chuẩn vàng, an toàn và kích thích cơ tối đa
+      final isSafeCompoundOrIsolation = eq == 'machine' ||
+          eq == 'cable' ||
+          eq == 'dumbbell' ||
+          (eq == 'barbell' &&
+              (name.contains('bench') ||
+                  name.contains('romanian') ||
+                  name.contains('press') ||
+                  name.contains('curl')));
+      if (isSafeCompoundOrIsolation) return 2;
+      if (eq == 'barbell' && (name.contains('squat') || name.contains('row'))) return 3;
+      if (name.contains('deadlift')) return 4;
+      return 3;
+    } else if (profile.isAdvanced) {
+      final isCompound = eq == 'barbell' &&
+          (name.contains('squat') ||
+              name.contains('bench') ||
+              name.contains('deadlift') ||
+              name.contains('press') ||
+              name.contains('row'));
+      if (isCompound) return 2;
+      return 3;
+    }
+    return 2;
+  }
+
   List<Exercise> _defaultPicks(List<String> muscles) {
     final pool = getFilteredExercises(muscles).where((e) => suggests(e.id)).toList();
     if (pool.length <= _pickTarget) return pool;
-
-    int rank(Exercise e) {
-      if (favorites[e.id] == true) return 0;
-      if (exerciseHistory(e.id).isNotEmpty) return 1;
-      final eq = e.equipment.toLowerCase();
-      final name = e.name.toLowerCase();
-
-      final isCardioOrHIIT = eq == 'cardio' ||
-          name.contains('run') ||
-          name.contains('cycle') ||
-          name.contains('rowing') ||
-          name.contains('jump') ||
-          name.contains('burpee') ||
-          name.contains('plank') ||
-          name.contains('hiit');
-
-      final isMassBuilder = (eq == 'barbell' || eq == 'dumbbell') &&
-          (name.contains('press') ||
-              name.contains('squat') ||
-              name.contains('deadlift') ||
-              name.contains('row') ||
-              name.contains('curl') ||
-              name.contains('pull up'));
-
-      if (profile.isCutting) {
-        // Người thừa cân / giảm mỡ: ưu tiên bài tiêu hao năng lượng cao, cardio, máy tập toàn thân
-        if (isCardioOrHIIT) return 2;
-        if (eq == 'machine' || eq == 'cable') return 3;
-      } else if (profile.isBulking) {
-        // Người thiếu cân / tăng cân: ưu tiên bài xây khối cơ tạ nặng (Mass Compound), tránh tiêu hao calo quá mức từ cardio
-        if (isCardioOrHIIT) return 5;
-        if (isMassBuilder) return 2;
-      }
-
-      if (profile.isBeginner) {
-        // Cho người mới: ưu tiên máy tập (Machine), cáp (Cable), tạ đơn (Dumbbell)
-        // Tránh các bài kỹ thuật phức tạp hoặc áp lực cột sống lớn (Deadlift, Clean, Snatch, Barbell Squat)
-        final isHard = name.contains('deadlift') ||
-            name.contains('clean') ||
-            name.contains('snatch') ||
-            (eq == 'barbell' && (name.contains('squat') || name.contains('row')));
-        final isBeginnerFriendly = eq == 'machine' || eq == 'cable' || eq == 'dumbbell';
-        if (isBeginnerFriendly && !isHard) return 2;
-        if (isHard) return 5;
-        return 3;
-      } else if (profile.isAdvanced) {
-        final isCompound = eq == 'barbell' &&
-            (name.contains('squat') ||
-                name.contains('bench') ||
-                name.contains('deadlift') ||
-                name.contains('press') ||
-                name.contains('row'));
-        if (isCompound) return 2;
-        return 3;
-      }
-      return 2;
-    }
 
     final picks = <Exercise>[];
 
     for (final m in muscles) {
       final forMuscle = pool.where((e) => e.primary == m && !picks.contains(e)).toList()
-        ..sort((a, b) => rank(a).compareTo(rank(b)));
+        ..sort((a, b) => rankExerciseForProfile(a).compareTo(rankExerciseForProfile(b)));
       if (forMuscle.isNotEmpty) picks.add(forMuscle.first);
     }
     final rest = pool.where((e) => !picks.contains(e)).toList()
-      ..sort((a, b) => rank(a).compareTo(rank(b)));
+      ..sort((a, b) => rankExerciseForProfile(a).compareTo(rankExerciseForProfile(b)));
     for (final e in rest) {
       if (picks.length >= _pickTarget) break;
       picks.add(e);
@@ -1009,6 +1039,56 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
     notifyListeners();
   }
 
+  void swapSessionExercise(int exIdx, String newId) {
+    final s = session;
+    if (s == null || exIdx < 0 || exIdx >= s.exercises.length) return;
+    final newEx = exerciseById(newId);
+    if (newEx == null) return;
+    final oldEx = s.exercises[exIdx];
+    if (oldEx.id == newId) return;
+
+    final targetCount = oldEx.sets.isNotEmpty ? oldEx.sets.length : kDefaultRoutineSets;
+    final newSets = _workingOpeners(newId, count: targetCount);
+
+    s.exercises[exIdx] = SessionExercise(
+      newEx.id,
+      newEx.name,
+      newEx.primary,
+      newSets,
+      linkedNext: oldEx.linkedNext,
+    );
+    sessionPicks.remove(oldEx.id);
+    sessionPicks.add(newEx.id);
+    persistNow();
+    notifyListeners();
+  }
+
+  List<Exercise> getAlternativeExercises(String currentExerciseId) {
+    final current = exerciseById(currentExerciseId);
+    if (current == null) return const [];
+    final inSession = session?.exercises.map((e) => e.id).toSet() ?? <String>{};
+    final muscle = current.primary;
+
+    final candidates = allExercises.where((e) {
+      if (e.id == current.id) return false;
+      if (inSession.contains(e.id)) return false;
+      if (e.primary != muscle) return false;
+      return suggests(e.id);
+    }).toList();
+
+    candidates.sort((a, b) {
+      final ra = rankExerciseForProfile(a);
+      final rb = rankExerciseForProfile(b);
+      if (ra != rb) return ra.compareTo(rb);
+      final fa = favorites[a.id] == true ? 0 : 1;
+      final fb = favorites[b.id] == true ? 0 : 1;
+      if (fa != fb) return fa.compareTo(fb);
+      return a.name.compareTo(b.name);
+    });
+
+    return candidates;
+  }
+
   List<Exercise> sessionSuggestions() {
     final inSession = session?.exercises.map((e) => e.id).toSet() ?? <String>{};
     final ids = <String>[];
@@ -1060,15 +1140,6 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
         if (!st.done) continue;
         done.add(st);
         if (st.counts) working.add(st);
-      }
-    }
-    if (done.isEmpty && s.exercises.isNotEmpty) {
-      for (final e in s.exercises) {
-        for (final st in e.sets) {
-          st.done = true;
-          done.add(st);
-          if (st.counts) working.add(st);
-        }
       }
     }
     s.summaryVolume = working.fold<double>(0, (sum, st) => sum + st.reps * st.weight).round();

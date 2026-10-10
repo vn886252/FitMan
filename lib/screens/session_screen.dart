@@ -184,6 +184,11 @@ class SessionScreen extends StatelessWidget {
         _guard(
           locked,
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            if (ex != null) ...[
+              _textAction(gc, '${"Đổi bài tương tự"}',
+                  () => _showSwapExerciseSheet(context, exIdx, ex)),
+              Container(width: 1, height: 12, color: gc.border),
+            ],
             if (ex != null && s.exercises.length > 1) ...[
               _textAction(gc, t.dropExerciseAction,
                   () => _confirmDrop(context, exIdx, t.catalogName(ex.id, ex.name))),
@@ -228,11 +233,40 @@ class SessionScreen extends StatelessWidget {
         Text(ex == null ? '' : t.catalogName(ex.id, ex.name),
             style: AppTheme.f(26, weight: FontWeight.w700, color: gc.text)),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(color: gc.emberSoft, borderRadius: BorderRadius.circular(100)),
-          child: Text(muscleLabel(ex?.primary ?? ''),
-              style: AppTheme.f(12, weight: FontWeight.w600, color: gc.ember)),
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(color: gc.emberSoft, borderRadius: BorderRadius.circular(100)),
+              child: Text(muscleLabel(ex?.primary ?? ''),
+                  style: AppTheme.f(12, weight: FontWeight.w600, color: gc.ember)),
+            ),
+            if (ex != null)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _showSwapExerciseSheet(context, fit.session?.currentIndex ?? 0, ex),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: gc.bgRaised2,
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(color: gc.border),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(PhosphorIconsRegular.arrowsClockwise, size: 13, color: gc.accent),
+                      const SizedBox(width: 5),
+                      Text('${"Đổi bài tương tự"}',
+                          style: AppTheme.f(11.5, weight: FontWeight.w700, color: gc.accent)),
+                    ],
+                  ),
+                ),
+              ),
+          ],
         ),
         if (ex != null && fit.lastSummaryFor(ex.id) != null) ...[
           const SizedBox(height: 10),
@@ -1914,4 +1948,282 @@ class _CelebrateState extends State<_Celebrate> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+void _showSwapExerciseSheet(BuildContext context, int exIdx, SessionExercise current) {
+  final gc = context.gc;
+  final alternatives = fit.getAlternativeExercises(current.id);
+
+  showAppSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (sheet) => _SwapExerciseSheetBody(
+      gc: gc,
+      exIdx: exIdx,
+      current: current,
+      alternatives: alternatives,
+    ),
+  );
+}
+
+class _SwapExerciseSheetBody extends StatefulWidget {
+  const _SwapExerciseSheetBody({
+    required this.gc,
+    required this.exIdx,
+    required this.current,
+    required this.alternatives,
+  });
+
+  final GymColors gc;
+  final int exIdx;
+  final SessionExercise current;
+  final List<Exercise> alternatives;
+
+  @override
+  State<_SwapExerciseSheetBody> createState() => _SwapExerciseSheetBodyState();
+}
+
+class _SwapExerciseSheetBodyState extends State<_SwapExerciseSheetBody> {
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gc = widget.gc;
+    final q = _query.trim().toLowerCase();
+    final filtered = widget.alternatives.where((e) {
+      if (q.isEmpty) return true;
+      final nameVi = t.catalogName(e.id, e.name).toLowerCase();
+      final nameEn = e.name.toLowerCase();
+      final eq = t.equipment(e.equipment).toLowerCase();
+      return nameVi.contains(q) || nameEn.contains(q) || eq.contains(q);
+    }).toList();
+
+    return Container(
+      padding: sheetPad(context),
+      constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.82),
+      decoration: BoxDecoration(
+        color: gc.bgRaised,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SheetHandle(),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: gc.accent.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(PhosphorIconsRegular.arrowsClockwise, size: 20, color: gc.accent),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${"Gợi ý bài tập thay thế"}',
+                      style: AppTheme.f(18, weight: FontWeight.w800, color: gc.text),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${"Cùng nhóm cơ: "} ${muscleLabel(widget.current.primary)} · ${"Chạm để đổi bài"}',
+                      style: AppTheme.f(12, weight: FontWeight.w500, color: gc.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: gc.bgRaised2,
+              borderRadius: BorderRadius.circular(100),
+              border: Border.all(color: gc.border),
+            ),
+            child: Row(
+              children: [
+                Icon(PhosphorIconsRegular.magnifyingGlass, size: 16, color: gc.textTertiary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: (v) => setState(() => _query = v),
+                    style: AppTheme.f(13.5, weight: FontWeight.w500, color: gc.text),
+                    cursorColor: gc.accent,
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      border: InputBorder.none,
+                      hintText: '${"Tìm bài tập cùng nhóm cơ..."}',
+                      hintStyle: AppTheme.f(13, weight: FontWeight.w500, color: gc.textTertiary),
+                    ),
+                  ),
+                ),
+                if (_query.isNotEmpty)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      _searchCtrl.clear();
+                      setState(() => _query = '');
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(PhosphorIconsRegular.xCircle, size: 16, color: gc.textTertiary),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (filtered.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 36),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(PhosphorIconsRegular.barbell, size: 36, color: gc.textTertiary),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${"Không tìm thấy bài tập tương tự phù hợp"}',
+                      style: AppTheme.f(13.5, weight: FontWeight.w600, color: gc.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.only(bottom: 16),
+                itemCount: filtered.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 8),
+                itemBuilder: (context, i) {
+                  final ex = filtered[i];
+                  final isSafe = fit.rankExerciseForProfile(ex) <= 2;
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      fit.swapSessionExercise(widget.exIdx, ex.id);
+                      Navigator.of(context).pop();
+                      showNotchToast(
+                        context,
+                        '${"Đã đổi bài tập thành"}',
+                        subtitle: exerciseName(ex),
+                        icon: PhosphorIconsRegular.arrowsClockwise,
+                        accent: gc.accent,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: gc.bgRaised2,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSafe ? gc.accent.withValues(alpha: 0.3) : gc.border,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        exerciseName(ex),
+                                        style: AppTheme.f(14, weight: FontWeight.w700, color: gc.text),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (isSafe) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: gc.accent.withValues(alpha: 0.16),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          '${"Khuyên dùng"}',
+                                          style: AppTheme.f(10, weight: FontWeight.w700, color: gc.accent),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: gc.bg,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        t.equipment(ex.equipment),
+                                        style: AppTheme.f(11, weight: FontWeight.w600, color: gc.textSecondary),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: gc.bg,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        t.difficulty(ex.difficulty),
+                                        style: AppTheme.f(11, weight: FontWeight.w600, color: gc.textTertiary),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                            width: 32,
+                            height: 32,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: gc.accent.withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(PhosphorIconsRegular.swap, size: 16, color: gc.accent),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
