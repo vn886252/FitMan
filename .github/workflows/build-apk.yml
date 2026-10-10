@@ -1,6 +1,8 @@
 name: Build & Release
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -52,22 +54,25 @@ jobs:
       - name: Test
         run: flutter test
 
-      # ABI splits keep each APK small instead of one fat APK.
-      - name: Build split APKs
-        run: flutter build apk --release --split-per-abi
+      # Build both universal APK and ABI split APKs
+      - name: Build APKs
+        run: |
+          flutter build apk --release
+          flutter build apk --release --split-per-abi
 
       - name: Rename APKs
         run: |
           cd build/app/outputs/flutter-apk
-          mv app-arm64-v8a-release.apk     GymMane-arm64-v8a.apk
-          mv app-armeabi-v7a-release.apk   GymMane-armeabi-v7a.apk
-          mv app-x86_64-release.apk        GymMane-x86_64.apk
+          cp app-release.apk FitMan-release.apk
+          mv app-arm64-v8a-release.apk   FitMan-arm64-v8a.apk
+          mv app-armeabi-v7a-release.apk FitMan-armeabi-v7a.apk
+          mv app-x86_64-release.apk      FitMan-x86_64.apk
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: gymmane-apks
-          path: build/app/outputs/flutter-apk/GymMane-*.apk
+          name: fitman-apks
+          path: build/app/outputs/flutter-apk/FitMan-*.apk
           if-no-files-found: error
 
   release:

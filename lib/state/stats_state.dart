@@ -744,12 +744,15 @@ mixin StatsState on FitCore, ToolsState, LibraryState, TimelineState {
 
   String? familyOnWeekday(int weekday) {
     final onDay = _recentSessions.where((s) => s.date.weekday == weekday).toList();
-    if (onDay.length < 2) return null;
+    // Only count as habit if it occurred on at least 2 distinct calendar dates (weeks)
+    final distinctDates = onDay.map((s) => _dayKey(s.date)).toSet();
+    if (distinctDates.length < 2) return null;
     final volume = <String, double>{};
     for (final s in onDay) {
       for (final e in s.exercises) {
         final f = muscleFamily(e.primary);
-        volume[f] = (volume[f] ?? 0) + e.volume;
+        final score = e.volume > 0 ? e.volume : (e.sets.length * 10).toDouble();
+        volume[f] = (volume[f] ?? 0) + score;
       }
     }
     if (volume.isEmpty) return null;
@@ -775,7 +778,8 @@ mixin StatsState on FitCore, ToolsState, LibraryState, TimelineState {
       final fam = <String, double>{};
       for (final e in s.exercises) {
         final f = muscleFamily(e.primary);
-        fam[f] = (fam[f] ?? 0) + e.volume;
+        final score = e.volume > 0 ? e.volume : (e.sets.length * 10).toDouble();
+        fam[f] = (fam[f] ?? 0) + score;
       }
       if (fam.isNotEmpty) {
         last = fam.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
@@ -783,8 +787,17 @@ mixin StatsState on FitCore, ToolsState, LibraryState, TimelineState {
     }
     const order = ['push', 'pull', 'legs'];
     final today = DateTime.now().weekday;
+    final idx = order.indexOf(last);
+
+    // If user trained recently (in active cycle), ALWAYS advance to next split:
+    // push -> pull -> legs -> push -> pull -> legs
+    if (idx >= 0 && lastWasRecent) {
+      final next = order[(idx + 1) % order.length];
+      return table[next]!;
+    }
+
     final habit = familyOnWeekday(today);
-    if (habit != null && order.contains(habit) && !(lastWasRecent && habit == last)) {
+    if (habit != null && order.contains(habit)) {
       final picked = table[habit]!;
       return (
         title: picked.title,
@@ -792,7 +805,6 @@ mixin StatsState on FitCore, ToolsState, LibraryState, TimelineState {
         muscles: picked.muscles,
       );
     }
-    final idx = order.indexOf(last);
 
     final next = idx >= 0 ? order[(idx + 1) % order.length] : order[today % 3];
     return table[next]!;

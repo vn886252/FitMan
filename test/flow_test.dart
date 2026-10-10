@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gymmane/models/workout.dart';
 import 'package:gymmane/state/fit_state.dart';
 
 void main() {
@@ -81,5 +82,31 @@ void main() {
 
     fit.resetDefaultPicks();
     expect(fit.sessionPicks.length, defaultCount);
+  });
+
+  test('PPL cycle progresses through push, pull, and legs in sequence', () {
+    fit.sessions.clear();
+    final now = DateTime.now();
+
+    // 1. Add Push session
+    fit.sessions.add(LoggedSession(now, 1800, [
+      LoggedExercise('bench', 'Bench', 'chest', [LoggedSet(10, 60)]),
+    ]));
+    // Next should be pull
+    expect(fit.suggestedFocus.muscles, ['back', 'biceps', 'trapezius']);
+
+    // 2. Add Pull session
+    fit.sessions.add(LoggedSession(now.add(const Duration(minutes: 5)), 1800, [
+      LoggedExercise('row', 'Row', 'back', [LoggedSet(10, 50)]),
+    ]));
+    // Next MUST be legs
+    expect(fit.suggestedFocus.muscles, ['quads', 'hamstrings', 'glutes']);
+
+    // 3. Add Legs session
+    fit.sessions.add(LoggedSession(now.add(const Duration(minutes: 10)), 1800, [
+      LoggedExercise('squat', 'Squat', 'quads', [LoggedSet(10, 70)]),
+    ]));
+    // Next should cycle back to push
+    expect(fit.suggestedFocus.muscles, ['chest', 'shoulders', 'triceps']);
   });
 }

@@ -21,7 +21,13 @@ class MealsScreen extends StatefulWidget {
 
 class _MealsScreenState extends State<MealsScreen> {
   static const _days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
-  String _selectedDay = 'Thứ 2';
+
+  static String get _todayWeekdayName {
+    final idx = (DateTime.now().weekday - 1).clamp(0, 6);
+    return _days[idx];
+  }
+
+  String _selectedDay = _todayWeekdayName;
 
   final _searchController = TextEditingController();
   String _searchQuery = '';
@@ -45,6 +51,7 @@ class _MealsScreenState extends State<MealsScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedDay = _todayWeekdayName;
     _loadEatenMeals();
     _loadWater();
   }
@@ -208,6 +215,7 @@ class _MealsScreenState extends State<MealsScreen> {
               child: Row(
                 children: _days.map((d) {
                   final isSel = _selectedDay == d;
+                  final isToday = d == _todayWeekdayName;
                   return GestureDetector(
                     onTap: () {
                       HapticFeedback.selectionClick();
@@ -218,18 +226,24 @@ class _MealsScreenState extends State<MealsScreen> {
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isSel ? gc.accent : gc.bgRaised,
+                        color: isSel
+                            ? gc.accent
+                            : (isToday ? gc.accentSoft : gc.bgRaised),
                         borderRadius: BorderRadius.circular(100),
                         border: Border.all(
-                          color: isSel ? gc.accent : gc.border,
+                          color: isSel
+                              ? gc.accent
+                              : (isToday ? gc.accent.withValues(alpha: 0.45) : gc.border),
                         ),
                       ),
                       child: Text(
-                        d,
+                        isToday ? '$d (Hôm nay)' : d,
                         style: AppTheme.f(
                           12.5,
-                          weight: FontWeight.w700,
-                          color: isSel ? Colors.white : gc.textSecondary,
+                          weight: (isSel || isToday) ? FontWeight.w700 : FontWeight.w500,
+                          color: isSel
+                              ? Colors.white
+                              : (isToday ? gc.accent : gc.textSecondary),
                         ),
                       ),
                     ),

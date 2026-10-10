@@ -1034,6 +1034,15 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
         if (st.counts) working.add(st);
       }
     }
+    if (done.isEmpty && s.exercises.isNotEmpty) {
+      for (final e in s.exercises) {
+        for (final st in e.sets) {
+          st.done = true;
+          done.add(st);
+          if (st.counts) working.add(st);
+        }
+      }
+    }
     s.summaryVolume = working.fold<double>(0, (sum, st) => sum + st.reps * st.weight).round();
     s.summarySets = working.length;
     s.summaryDuration = s.manual ? _elapsedBefore : sessionElapsed;
