@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'app/gymmane_app.dart';
 import 'services/alarm_store.dart';
+import 'services/cloud_sync_service.dart';
 import 'services/device_kind.dart';
 import 'services/home_widget_bridge.dart';
 import 'services/live_workout.dart';
@@ -30,6 +31,7 @@ Future<void> main() async {
   await MediaStore.init();
   await AlarmStore.init();
   fit.loadFromStore();
+  CloudSyncService.instance.init();
   await RestAlarm.instance.init();
   fit.syncPhotoReminder();
   fit.syncTrainReminder();
