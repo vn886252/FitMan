@@ -41,6 +41,63 @@ const List<ProgramTemplate> kProgramTemplates = [
     ], weekday: 5),
   ]),
 
+  // ─── GIÁO ÁN GIẢM CÂN · ĐỐT MỠ NHANH (CHO NGƯỜI THỪA CÂN / CUT) ─────────
+  ProgramTemplate('weight_loss_cut', 'Giảm Cân & Đốt Mỡ Nhanh (Fat Burn)', [
+    ProgramDay('Ngày 1 · Đốt Mỡ Toàn Thân & Core', [
+      ('Leg Press', 4),
+      ('Incline Dumbbell Press', 4),
+      ('Lat Pulldown', 4),
+      ('Lateral Raise', 3),
+      ('Plank', 3),
+    ], weekday: 1),
+    ProgramDay('Ngày 2 · Thân Trên & Nhịp Tim Cao', [
+      ('Seated Cable Row', 4),
+      ('Cable Fly', 4),
+      ('Dumbbell Standing Overhead Press', 3),
+      ('Hammer Curl', 3),
+      ('Triceps Pushdown', 3),
+      ('Plank', 3),
+    ], weekday: 3),
+    ProgramDay('Ngày 3 · Thân Dưới Săn Chắc & Calo', [
+      ('Leg Press', 4),
+      ('Romanian Deadlift', 4),
+      ('Leg Extension', 3),
+      ('Leg Curl', 3),
+      ('Standing Calf Raise', 4),
+      ('Plank', 3),
+    ], weekday: 5),
+  ]),
+
+  // ─── GIÁO ÁN TĂNG CÂN & TĂNG KHỐI CƠ (CHO NGƯỜI THIẾU CÂN / BULK) ─────────
+  ProgramTemplate('mass_gain_bulk', 'Tăng Cân & Xây Khối Cơ (Mass Building)', [
+    ProgramDay('Ngày 1 · Ngực & Tay Sau Khối Lượng', [
+      ('Barbell Bench Press', 4),
+      ('Incline Dumbbell Press', 4),
+      ('Cable Fly', 3),
+      ('Triceps Pushdown', 4),
+    ], weekday: 1),
+    ProgramDay('Ngày 2 · Lưng Xô & Tay Trước Dày Cơ', [
+      ('Deadlift', 3),
+      ('Barbell Row', 4),
+      ('Lat Pulldown', 4),
+      ('Barbell Curl', 4),
+      ('Hammer Curl', 3),
+    ], weekday: 2),
+    ProgramDay('Ngày 3 · Chân Mông To Toàn Diện', [
+      ('Barbell Squat', 4),
+      ('Leg Press', 4),
+      ('Romanian Deadlift', 4),
+      ('Standing Calf Raise', 4),
+    ], weekday: 4),
+    ProgramDay('Ngày 4 · Vai Vạm Vỡ & Bắp Tay', [
+      ('Overhead Press', 4),
+      ('Lateral Raise', 4),
+      ('Face Pull', 3),
+      ('Barbell Curl', 3),
+      ('Triceps Pushdown', 3),
+    ], weekday: 5),
+  ]),
+
   // ─── GIÁO ÁN CHO NGƯỜI MỚI (BEGINNER FRIENDLY · AN TOÀN & DỄ TẬP) ─────────
   ProgramTemplate('beginner_friendly', 'Người Mới Bắt Đầu · Toàn Thân An Toàn', [
     ProgramDay('Ngày 1 · Chân & Ngực (Máy & Tạ đơn)', [

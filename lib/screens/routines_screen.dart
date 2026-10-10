@@ -56,7 +56,26 @@ class RoutinesScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 22),
-            Text(t.weeklyPlan, style: AppTheme.f(12, weight: FontWeight.w600, color: gc.textSecondary, letterSpacing: 1.5)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(t.weeklyPlan, style: AppTheme.f(12, weight: FontWeight.w600, color: gc.textSecondary, letterSpacing: 1.5)),
+                GestureDetector(
+                  onTap: () => _openTemplates(context),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(PhosphorIconsRegular.stack, size: 13, color: gc.accent),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${"Áp dụng giáo án ➔"}',
+                        style: AppTheme.f(12, weight: FontWeight.w700, color: gc.accent),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
             SoftCard(
               radius: 20,
@@ -203,6 +222,19 @@ class RoutinesScreen extends StatelessWidget {
 
   void _openTemplates(BuildContext context) {
     final gc = context.gc;
+    final profile = fit.profile;
+    final templates = [...kProgramTemplates]..sort((a, b) {
+        final aRec = (profile.isCutting && a.id == 'weight_loss_cut') ||
+            (profile.isBulking && a.id == 'mass_gain_bulk') ||
+            (profile.isBeginner && a.id == 'beginner_friendly');
+        final bRec = (profile.isCutting && b.id == 'weight_loss_cut') ||
+            (profile.isBulking && b.id == 'mass_gain_bulk') ||
+            (profile.isBeginner && b.id == 'beginner_friendly');
+        if (aRec && !bRec) return -1;
+        if (!aRec && bRec) return 1;
+        return 0;
+      });
+
     showAppSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -223,7 +255,7 @@ class RoutinesScreen extends StatelessWidget {
               const SizedBox(height: 16),
               SheetTitle(t.templates, subtitle: t.templatesHint),
               const SizedBox(height: 16),
-              for (final template in kProgramTemplates)
+              for (final template in templates)
                 _templateCard(context, gc, sheet, template),
             ],
           ),
@@ -233,17 +265,27 @@ class RoutinesScreen extends StatelessWidget {
   }
 
   Widget _templateCard(BuildContext context, GymColors gc, BuildContext sheet, ProgramTemplate template) {
-    final isRecommended = (fit.profile.isBeginner && template.id == 'beginner_friendly') ||
-        (fit.profile.isAdvanced && template.id == 'ppl_6day') ||
-        (fit.profile.isIntermediate && template.id == 'upperlower');
+    final profile = fit.profile;
+    final isRecommended = (profile.isCutting && template.id == 'weight_loss_cut') ||
+        (profile.isBulking && template.id == 'mass_gain_bulk') ||
+        (profile.isBeginner && template.id == 'beginner_friendly') ||
+        (profile.isAdvanced && template.id == 'ppl_6day') ||
+        (profile.isIntermediate && template.id == 'upperlower');
+
+    String recommendationBadge() {
+      if (profile.isCutting && template.id == 'weight_loss_cut') return '${"GIẢM CÂN · ĐỐT MỠ"}';
+      if (profile.isBulking && template.id == 'mass_gain_bulk') return '${"TĂNG CÂN · TĂNG CƠ"}';
+      if (profile.isBeginner && template.id == 'beginner_friendly') return '${"NGƯỜI MỚI"}';
+      return '${"DÀNH CHO BẠN"}';
+    }
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        final made = fit.applyTemplate(template);
+        final made = fit.applyTemplate(template, forceSchedule: true);
         Navigator.pop(sheet);
         if (made == 0 || !context.mounted) return;
-        showNotchToast(context, t.templateAdded(made),
+        showNotchToast(context, 'Đã áp dụng & cập nhật Lịch tuần ($made buổi)',
             subtitle: template.name, icon: PhosphorIconsFill.stack, accent: context.gc.sage);
       },
       child: Container(
@@ -287,7 +329,7 @@ class RoutinesScreen extends StatelessWidget {
                             color: gc.accent,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Text('${"DÀNH CHO BẠN"}',
+                          child: Text(recommendationBadge(),
                               style: TextStyle(
                                   fontSize: 8.5, fontWeight: FontWeight.w800, color: gc.bg)),
                         ),
@@ -413,6 +455,10 @@ class RoutinesScreen extends StatelessWidget {
                 Navigator.pop(sheet);
                 sharePlan([r]);
               }),
+              OptionItem('${"Đặt vào lịch tập tuần"}', icon: PhosphorIconsRegular.calendarPlus, onTap: () {
+                Navigator.pop(sheet);
+                _scheduleRoutine(context, r);
+              }),
               OptionItem(t.duplicateRoutine, icon: PhosphorIconsRegular.copy, onTap: () {
                 Navigator.pop(sheet);
                 fit.duplicateRoutine(r.id);
@@ -430,6 +476,58 @@ class RoutinesScreen extends StatelessWidget {
               }),
             ]),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _scheduleRoutine(BuildContext context, Routine r) {
+    final gc = context.gc;
+    showAppSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheet) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Container(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheet).height * 0.72),
+          padding: sheetPad(sheet),
+          decoration: BoxDecoration(
+            color: gc.bgRaised,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SheetHandle(),
+              const SizedBox(height: 16),
+              SheetTitle('${"Lịch tập tuần"}', subtitle: fit.routineTitle(r)),
+              const SizedBox(height: 14),
+              Flexible(
+                child: OptionGroup(
+                  scroll: true,
+                  [
+                    for (int weekday = 1; weekday <= 7; weekday++)
+                      OptionItem(
+                        t.weekday(weekday),
+                        icon: fit.weeklyPlan[weekday] == r.id
+                            ? PhosphorIconsFill.checkCircle
+                            : PhosphorIconsRegular.calendarPlus,
+                        selected: fit.weeklyPlan[weekday] == r.id,
+                        detail: fit.weeklyPlan[weekday] == r.id
+                            ? '${"Đang tập ngày này"}'
+                            : (fit.weeklyPlan[weekday] != null ? '${"Đang có bài tập khác"}' : t.restDayShort),
+                        onTap: () {
+                          final current = fit.weeklyPlan[weekday] == r.id;
+                          fit.assignRoutineToDay(weekday, current ? null : r.id);
+                          setSheetState(() {});
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

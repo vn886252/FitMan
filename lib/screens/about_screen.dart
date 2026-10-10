@@ -14,7 +14,6 @@ const _kVersion = '1.3.0';
 const _kAuthor = 'FitMan Team';
 const _kAuthorUrl = 'https://github.com/vn886252/FitMan';
 const _kRepoUrl = 'https://github.com/vn886252/FitMan';
-const _kKofiUrl = 'https://ko-fi.com/inlitx';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -186,7 +185,6 @@ class AboutScreen extends StatelessWidget {
     final rows = <(IconData, String, String, String, Color?)>[
       (PhosphorIconsFill.heart, t.madeWithLoveBy, _kAuthor, _kAuthorUrl, gc.accent),
       (PhosphorIconsRegular.githubLogo, t.sourceCode, 'FitMan', _kRepoUrl, null),
-      (PhosphorIconsRegular.coffee, t.buyCoffee, 'ko-fi.com/inlitx', _kKofiUrl, null),
     ];
     return Container(
       clipBehavior: Clip.antiAlias,

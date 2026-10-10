@@ -38,6 +38,21 @@ class Profile {
   bool get isIntermediate => experienceLevel == 'intermediate';
   bool get isAdvanced => experienceLevel == 'advanced';
 
+  /// Chỉ số khối cơ thể (BMI)
+  double get bmi => (heightCm > 0) ? weightKg / ((heightCm / 100) * (heightCm / 100)) : 22.0;
+
+  /// Người cần giảm cân / giảm mỡ (thừa cân hoặc chọn cut)
+  bool get isCutting => fitnessGoal == 'cut' || (fitnessGoal != 'bulk' && bmi >= 24.0);
+
+  /// Người cần tăng cân / tăng cơ (thiếu cân hoặc chọn bulk)
+  bool get isBulking => fitnessGoal == 'bulk' || (fitnessGoal != 'cut' && bmi < 19.0);
+
+  /// Thừa cân theo chỉ số BMI (>= 25)
+  bool get isOverweight => bmi >= 25.0;
+
+  /// Thiếu cân theo chỉ số BMI (< 18.5)
+  bool get isUnderweight => bmi < 18.5;
+
   String get experienceTitle {
     switch (experienceLevel) {
       case 'advanced':

@@ -104,6 +104,34 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
       if (exerciseHistory(e.id).isNotEmpty) return 1;
       final eq = e.equipment.toLowerCase();
       final name = e.name.toLowerCase();
+
+      final isCardioOrHIIT = eq == 'cardio' ||
+          name.contains('run') ||
+          name.contains('cycle') ||
+          name.contains('rowing') ||
+          name.contains('jump') ||
+          name.contains('burpee') ||
+          name.contains('plank') ||
+          name.contains('hiit');
+
+      final isMassBuilder = (eq == 'barbell' || eq == 'dumbbell') &&
+          (name.contains('press') ||
+              name.contains('squat') ||
+              name.contains('deadlift') ||
+              name.contains('row') ||
+              name.contains('curl') ||
+              name.contains('pull up'));
+
+      if (profile.isCutting) {
+        // Người thừa cân / giảm mỡ: ưu tiên bài tiêu hao năng lượng cao, cardio, máy tập toàn thân
+        if (isCardioOrHIIT) return 2;
+        if (eq == 'machine' || eq == 'cable') return 3;
+      } else if (profile.isBulking) {
+        // Người thiếu cân / tăng cân: ưu tiên bài xây khối cơ tạ nặng (Mass Compound), tránh tiêu hao calo quá mức từ cardio
+        if (isCardioOrHIIT) return 5;
+        if (isMassBuilder) return 2;
+      }
+
       if (profile.isBeginner) {
         // Cho người mới: ưu tiên máy tập (Machine), cáp (Cable), tạ đơn (Dumbbell)
         // Tránh các bài kỹ thuật phức tạp hoặc áp lực cột sống lớn (Deadlift, Clean, Snatch, Barbell Squat)

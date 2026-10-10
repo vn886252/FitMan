@@ -557,7 +557,7 @@ class FitState extends FitCore
 
   Exercise? matchExerciseByName(String name) => matchExercise(name, allExercises);
 
-  int applyTemplate(ProgramTemplate template) {
+  int applyTemplate(ProgramTemplate template, {bool forceSchedule = false}) {
     final planWasEmpty = weeklyPlan.isEmpty;
     var made = 0;
     final sameDay = <String, String>{};
@@ -572,7 +572,7 @@ class FitState extends FitCore
       final key = '${day.name}|${ids.entries.map((e) => '${e.key}:${e.value}').join(',')}';
       final twin = sameDay[key];
       if (twin != null) {
-        if (planWasEmpty && day.weekday != null) weeklyPlan[day.weekday!] = twin;
+        if ((planWasEmpty || forceSchedule) && day.weekday != null) weeklyPlan[day.weekday!] = twin;
         continue;
       }
       final id = createRoutine(day.name);
@@ -582,7 +582,7 @@ class FitState extends FitCore
         toggleRoutineExercise(id, entry.key);
         bumpRoutineSets(id, entry.key, entry.value - kDefaultRoutineSets);
       }
-      if (planWasEmpty && day.weekday != null) weeklyPlan[day.weekday!] = id;
+      if ((planWasEmpty || forceSchedule) && day.weekday != null) weeklyPlan[day.weekday!] = id;
       made++;
     }
     if (made == 0) return 0;

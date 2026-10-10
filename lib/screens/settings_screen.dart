@@ -38,7 +38,6 @@ import '../widgets/ui_kit.dart';
 const _kRepoUrl = 'https://github.com/vn886252/FitMan';
 const _kBugUrl = '$_kRepoUrl/issues/new?labels=bug';
 const _kFeatureUrl = '$_kRepoUrl/issues/new?labels=enhancement';
-const _kKofiUrl = 'https://ko-fi.com/inlitx';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -311,8 +310,6 @@ class SettingsScreen extends StatelessWidget {
             _linkGroup(gc, [
               (PhosphorIconsRegular.bug, t.reportBug, () => _open(context, _kBugUrl)),
               (PhosphorIconsRegular.lightbulb, t.requestFeature, () => _open(context, _kFeatureUrl)),
-              (PhosphorIconsRegular.githubLogo, t.starOnGithub, () => _open(context, _kRepoUrl)),
-              (PhosphorIconsRegular.coffee, t.buyCoffee, () => _open(context, _kKofiUrl)),
             ]),
             const SizedBox(height: 22),
             _linkGroup(gc, [

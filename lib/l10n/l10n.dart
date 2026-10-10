@@ -111,6 +111,8 @@ extension GymL10n on AppLocalizations {
       };
 
   String templateBlurb(String id) => switch (id) {
+        'weight_loss_cut' => '${"Tối ưu cho người thừa cân & giảm mỡ: hiệp tập 12-15 reps nhịp tim cao, đốt calo tối đa, săn chắc cơ toàn thân."}',
+        'mass_gain_bulk' => '${"Tối ưu cho người thiếu cân & tăng cơ nạc: hiệp 6-10 reps tạ nặng, kích thích phì đại cơ bắp (Hypertrophy) tối đa."}',
         'beginner_friendly' => '${"Giáo án tối ưu cho người mới bắt đầu: an toàn, thân thiện, dùng máy và tạ đơn tránh chấn thương."}',
         'fullbody_ab' => '${"Phân kỳ chu kỳ A/B luân phiên, tối ưu phát triển cơ bắp toàn diện."}',
         'ppl_6day' => '${"Lịch tập 6 buổi/tuần cường độ cao cho vận động viên thể hình nâng cao."}',
