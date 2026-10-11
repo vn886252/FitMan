@@ -12,6 +12,7 @@ import 'services/local_store.dart';
 import 'services/media_store.dart';
 import 'services/rest_alarm.dart';
 import 'services/screen_awake.dart';
+import 'services/subscription_service.dart';
 import 'state/fit_state.dart';
 import 'wear/wear_app.dart';
 
@@ -73,6 +74,7 @@ Future<void> main() async {
   await AlarmStore.init();
   fit.loadFromStore();
   CloudSyncService.instance.init();
+  await SubscriptionService.instance.init();
   await RestAlarm.instance.init();
   fit.syncPhotoReminder();
   fit.syncTrainReminder();

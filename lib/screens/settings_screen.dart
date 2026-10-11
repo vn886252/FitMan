@@ -20,7 +20,9 @@ import '../services/fitnotes_backup.dart';
 import '../services/home_widget_bridge.dart';
 import '../services/rest_alarm.dart';
 import '../services/sqlite_reader.dart';
+import '../services/subscription_service.dart';
 import '../services/workout_import.dart';
+import 'paywall_sheet.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -295,6 +297,118 @@ class SettingsScreen extends StatelessWidget {
             _linkGroup(gc, [
               (PhosphorIconsRegular.mapPin, t.placesLabel, fit.goPlaces),
             ]),
+            const SizedBox(height: 18),
+            _sectionLabel(gc, '${"Gói Hội Viên & Dùng Thử"}'),
+            const SizedBox(height: 8),
+            ListenableBuilder(
+              listenable: SubscriptionService.instance,
+              builder: (context, _) {
+                final sub = SubscriptionService.instance;
+                final isVip = sub.isVip;
+                final badgeText = sub.statusBadgeText;
+                final remainingSlots = sub.remainingEarlyBirdSlots;
+                final discountActive = sub.isEarlyBirdActive;
+
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => showPaywallSheet(context),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isVip
+                            ? [const Color(0xFFF47E1D).withValues(alpha: 0.18), const Color(0xFFFFB347).withValues(alpha: 0.08)]
+                            : [const Color(0xFFE53935).withValues(alpha: 0.16), const Color(0xFFF47E1D).withValues(alpha: 0.08)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isVip
+                            ? const Color(0xFFF47E1D).withValues(alpha: 0.4)
+                            : const Color(0xFFF47E1D).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFF47E1D), Color(0xFFFF9E40)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFF47E1D).withValues(alpha: 0.3),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(PhosphorIconsFill.crown, color: Colors.white, size: 22),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    isVip ? '${"FitMan PRO (Đã kích hoạt)"}' : '${"FitMan VIP Member"}',
+                                    style: AppTheme.f(15, weight: FontWeight.w800, color: gc.text),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: isVip ? const Color(0xFF4CAF50) : const Color(0xFFF47E1D),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      isVip ? '${"PRO"}' : (discountActive ? '${"-60%"}' : '${"TRIAL"}'),
+                                      style: AppTheme.f(9.5, weight: FontWeight.w900, color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                isVip
+                                    ? '${"Đặc quyền VIP trọn đời · Cloud Sync kích hoạt"}'
+                                    : (discountActive
+                                        ? '${"199k Trọn Đời (gốc 500k) · Còn "}$remainingSlots${" suất"}'
+                                        : badgeText),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTheme.f(12, weight: FontWeight.w600, color: const Color(0xFFF47E1D)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF47E1D).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(color: const Color(0xFFF47E1D).withValues(alpha: 0.35)),
+                          ),
+                          child: Text(
+                            isVip ? '${"Chi tiết"}' : '${"Nâng cấp"}',
+                            style: AppTheme.f(12, weight: FontWeight.w700, color: const Color(0xFFF47E1D)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 18),
             _sectionLabel(gc, '${"Đồng bộ đám mây (Cloud Sync)"}'),
             const SizedBox(height: 8),

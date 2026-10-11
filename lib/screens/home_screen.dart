@@ -3,6 +3,7 @@ import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 import '../l10n/l10n.dart';
 import '../models/exercise.dart';
+import '../services/subscription_service.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -13,6 +14,7 @@ import '../widgets/glass.dart';
 import '../widgets/home_folder.dart';
 import '../widgets/svg_icon.dart';
 import '../widgets/ui_kit.dart';
+import 'paywall_sheet.dart';
 import 'progress_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -133,7 +135,63 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
+        ListenableBuilder(
+          listenable: SubscriptionService.instance,
+          builder: (context, _) {
+            final sub = SubscriptionService.instance;
+            final isVip = sub.isVip;
+            final isTrial = sub.isTrialActive;
+            final days = sub.trialDaysRemaining;
+
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => showPaywallSheet(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+                decoration: BoxDecoration(
+                  color: isVip
+                      ? const Color(0xFFF47E1D).withValues(alpha: 0.16)
+                      : (isTrial
+                          ? const Color(0xFF54B979).withValues(alpha: 0.16)
+                          : Colors.red.withValues(alpha: 0.16)),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: isVip
+                        ? const Color(0xFFF47E1D).withValues(alpha: 0.45)
+                        : (isTrial
+                            ? const Color(0xFF54B979).withValues(alpha: 0.45)
+                            : Colors.red.withValues(alpha: 0.45)),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isVip ? PhosphorIconsFill.crown : PhosphorIconsFill.timer,
+                      size: 13,
+                      color: isVip
+                          ? const Color(0xFFF47E1D)
+                          : (isTrial ? const Color(0xFF54B979) : Colors.red),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      isVip ? '${"VIP"}' : (isTrial ? '${"Thử: "}$days${"d"}' : '${"Hết hạn"}'),
+                      style: AppTheme.f(
+                        11.5,
+                        weight: FontWeight.w800,
+                        color: isVip
+                            ? const Color(0xFFF47E1D)
+                            : (isTrial ? const Color(0xFF54B979) : Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(width: 8),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: fit.goProgress,
@@ -373,7 +431,17 @@ class HomeScreen extends StatelessWidget {
                     label: t.startWorkout,
                     icon: Ic.play,
                     height: 52,
-                    onTap: isRoutine ? () => fit.startRoutine(routine) : fit.startFocusWorkout,
+                    onTap: () {
+                      if (!SubscriptionService.instance.hasAccess) {
+                        showPaywallSheet(context);
+                        return;
+                      }
+                      if (isRoutine) {
+                        fit.startRoutine(routine);
+                      } else {
+                        fit.startFocusWorkout();
+                      }
+                    },
                   ),
                 ],
               ),
