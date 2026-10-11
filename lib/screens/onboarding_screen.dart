@@ -8,6 +8,7 @@ import '../catalog/program_templates.dart';
 import '../data/vietnamese_meals.dart';
 import '../l10n/l10n.dart';
 import '../models/profile.dart';
+import '../services/cloud_sync_service.dart';
 import '../services/local_store.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
@@ -16,6 +17,7 @@ import '../widgets/app_background.dart';
 import '../widgets/body_rulers.dart';
 import '../widgets/entrance.dart';
 import '../widgets/ui_kit.dart';
+import 'settings_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -336,6 +338,165 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   _promise(gc, PhosphorIconsRegular.wifiSlash, t.fullyOffline, t.fullyOfflineWhy),
                   _promise(gc, PhosphorIconsRegular.export, t.yoursToTake, t.yoursToTakeWhy),
                 ]),
+              ),
+              const SizedBox(height: 18),
+              _in(
+                5,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFFF47E1D).withValues(alpha: 0.16),
+                        const Color(0xFFFF9E40).withValues(alpha: 0.06),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFF47E1D).withValues(alpha: 0.35)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF47E1D),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(PhosphorIconsFill.crown, size: 18, color: Colors.white),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${"7 NGÀY DÙNG THỬ FULL QUYỀN"}',
+                                  style: AppTheme.f(13.5, weight: FontWeight.w800, color: const Color(0xFFF47E1D)),
+                                ),
+                                Text(
+                                  '${"Trải nghiệm trọn vẹn toàn bộ tính năng"}',
+                                  style: AppTheme.f(11.5, weight: FontWeight.w600, color: gc.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '${"• Trong 7 ngày đầu: Bạn được dùng thử toàn bộ giáo án, thực đơn dinh dưỡng và lưu đám mây không giới hạn."}',
+                        style: AppTheme.f(12, weight: FontWeight.w500, color: gc.text, height: 1.4),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '${"• Sau khi hết 7 ngày: Dữ liệu của bạn vẫn còn nguyên vẹn ở đó (không bị xóa), nhưng app sẽ dừng lưu buổi tập mới từ ngày thứ 8 trở đi."}',
+                        style: AppTheme.f(12, weight: FontWeight.w500, color: gc.text, height: 1.4),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '${"• Quyền riêng tư tuyệt đối: Bạn có thể xóa toàn bộ thông tin của mình bất cứ lúc nào trong Cài đặt."}',
+                        style: AppTheme.f(12, weight: FontWeight.w600, color: const Color(0xFF54B979), height: 1.4),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              _in(
+                6,
+                ListenableBuilder(
+                  listenable: CloudSyncService.instance,
+                  builder: (context, _) {
+                    final cloud = CloudSyncService.instance;
+                    final logged = cloud.isLoggedIn;
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => showCloudSyncSheet(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: gc.bgRaised,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: logged
+                                ? gc.accent.withValues(alpha: 0.5)
+                                : gc.border,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: logged
+                                    ? gc.accent.withValues(alpha: 0.16)
+                                    : gc.bgRaised2,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                logged
+                                    ? PhosphorIconsRegular.cloudCheck
+                                    : PhosphorIconsRegular.cloudArrowUp,
+                                size: 20,
+                                color: logged ? gc.accent : gc.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    logged
+                                        ? '${"Đã đồng bộ Cloud: "} ${cloud.currentUser?.email ?? "Thiết bị này"}'
+                                        : '${"Đăng nhập Cloud (Gmail / Tạo tài khoản)"}',
+                                    style: AppTheme.f(13.5,
+                                        weight: FontWeight.w700,
+                                        color: logged ? gc.accent : gc.text),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    logged
+                                        ? '${"Dữ liệu tập luyện được bảo vệ an toàn"}'
+                                        : '${"Đổi điện thoại tập tiếp không sợ mất dữ liệu (Tùy chọn)"}',
+                                    style: AppTheme.f(11.5,
+                                        weight: FontWeight.w500, color: gc.textSecondary),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: logged
+                                    ? gc.accent.withValues(alpha: 0.12)
+                                    : gc.bgRaised2,
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Text(
+                                logged ? '${"Đã kết nối"}' : '${"Kết nối"}',
+                                style: AppTheme.f(11,
+                                    weight: FontWeight.w700,
+                                    color: logged ? gc.accent : gc.textSecondary),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),

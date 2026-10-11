@@ -137,6 +137,31 @@ class CloudSyncService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu trên đám mây
+  Future<bool> deleteAccountAndData() async {
+    if (!_initialized || !isLoggedIn) return false;
+    try {
+      final user = FirebaseAuth.instance.currentUser!;
+      final uid = user.uid;
+      try {
+        await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+      } catch (e) {
+        debugPrint('Delete firestore doc error: $e');
+      }
+      await user.delete();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefLastSyncKey);
+      _lastSyncTime = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('Delete user account error: $e');
+      _lastError = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Tải dữ liệu từ máy lên Đám mây (Cloud Firestore)
   Future<bool> syncToCloud() async {
     if (!_initialized || !isLoggedIn || _isSyncing) return false;

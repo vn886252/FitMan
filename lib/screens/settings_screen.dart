@@ -1720,7 +1720,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
   }
 }
 
-void _showCloudSyncSheet(BuildContext context) {
+void showCloudSyncSheet(BuildContext context) {
   showAppSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -1729,8 +1729,10 @@ void _showCloudSyncSheet(BuildContext context) {
   );
 }
 
+void _showCloudSyncSheet(BuildContext context) => showCloudSyncSheet(context);
+
 @visibleForTesting
-void showCloudSyncSheetForTest(BuildContext context) => _showCloudSyncSheet(context);
+void showCloudSyncSheetForTest(BuildContext context) => showCloudSyncSheet(context);
 
 class _CloudSyncSheetBody extends StatefulWidget {
   const _CloudSyncSheetBody();
@@ -1975,7 +1977,34 @@ class _CloudSyncSheetBodyState extends State<_CloudSyncSheetBody> {
                       onPressed: () => cloud.signOut(),
                       child: Text(
                         '${"Đăng xuất tài khoản"}',
-                        style: AppTheme.f(13, weight: FontWeight.w600, color: gc.warn),
+                        style: AppTheme.f(13, weight: FontWeight.w600, color: gc.textSecondary),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: TextButton(
+                      onPressed: () async {
+                        final ok = await askConfirm(
+                          context,
+                          title: '${"Xóa tài khoản & dữ liệu đám mây?"}',
+                          body: '${"Toàn bộ bản sao lưu trên đám mây và tài khoản của bạn sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."}',
+                          confirmLabel: '${"Xóa vĩnh viễn"}',
+                        );
+                        if (!ok) return;
+                        final success = await cloud.deleteAccountAndData();
+                        if (!context.mounted) return;
+                        if (success) {
+                          showNotchToast(
+                            context,
+                            '${"Đã xóa tài khoản và dữ liệu thành công!"}',
+                            icon: PhosphorIconsRegular.trash,
+                            accent: gc.warn,
+                          );
+                        }
+                      },
+                      child: Text(
+                        '${"Xóa tài khoản & dữ liệu đám mây"}',
+                        style: AppTheme.f(12.5, weight: FontWeight.w600, color: gc.warn),
                       ),
                     ),
                   ),
