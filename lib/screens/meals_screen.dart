@@ -35,12 +35,13 @@ class _MealsScreenState extends State<MealsScreen> {
 
   static const _categoryTabs = [
     ('all', 'Tất cả', '✨'),
-    ('pre_workout', 'Trước tập', '⚡'),
-    ('post_workout', 'Sau tập', '💪'),
+    ('drink_snack', 'Đồ uống & Ăn vặt', '🧋'),
     ('breakfast', 'Bữa sáng', '☀️'),
     ('lunch', 'Bữa trưa', '🍲'),
     ('dinner', 'Bữa tối', '🌙'),
-    ('snack', 'Bữa phụ', '🍌'),
+    ('pre_workout', 'Trước tập', '⚡'),
+    ('post_workout', 'Sau tập', '💪'),
+    ('snack', 'Bữa phụ & Whey', '🍌'),
   ];
 
   // Map<Day, Map<MealId, PortionFactor>>
@@ -63,6 +64,14 @@ class _MealsScreenState extends State<MealsScreen> {
   }
 
   void _loadEatenMeals() {
+    final cleared = Store.instance.note('vietnamese_meals_auto_tick_cleared_v1') == 'true';
+    if (!cleared) {
+      Store.instance.setNote('vietnamese_meals_auto_tick_cleared_v1', 'true');
+      _eatenByDay = {for (final d in _days) d: <String, double>{}};
+      _saveEatenMeals();
+      return;
+    }
+
     final raw = Store.instance.note('vietnamese_meals_eaten');
     if (raw != null && raw.isNotEmpty) {
       try {
@@ -86,6 +95,14 @@ class _MealsScreenState extends State<MealsScreen> {
 
   void _saveEatenMeals() {
     Store.instance.setNote('vietnamese_meals_eaten', jsonEncode(_eatenByDay));
+  }
+
+  void _clearAllEatenToday() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _eatenByDay[_selectedDay] = <String, double>{};
+    });
+    _saveEatenMeals();
   }
 
   void _loadWater() {
@@ -399,10 +416,39 @@ class _MealsScreenState extends State<MealsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'TỔNG KẾT: ${_selectedDay.toUpperCase()}',
-                      style: AppTheme.f(10.5,
-                          weight: FontWeight.w800, color: gc.accent, letterSpacing: 1.4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'TỔNG KẾT: ${_selectedDay.toUpperCase()}',
+                            style: AppTheme.f(10.5,
+                                weight: FontWeight.w800, color: gc.accent, letterSpacing: 1.4),
+                          ),
+                        ),
+                        if ((_eatenByDay[_selectedDay]?.isNotEmpty ?? false))
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _clearAllEatenToday,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: gc.warn.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(PhosphorIconsRegular.arrowCounterClockwise, size: 12, color: gc.warn),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Bỏ tick tất cả',
+                                    style: AppTheme.s(10.5, weight: FontWeight.w700, color: gc.warn),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -587,7 +633,7 @@ class _MealsScreenState extends State<MealsScreen> {
                   },
                   style: AppTheme.f(13.5, weight: FontWeight.w600, color: gc.text),
                   decoration: InputDecoration(
-                    hintText: 'Tìm kiếm món ăn (phở, bò, gà, yến mạch, tôm, cá...)',
+                    hintText: 'Tìm kiếm món (cà phê sữa, trà sữa, bánh tráng, phở, bò, gà...)',
                     hintStyle: AppTheme.s(12, color: gc.textTertiary),
                     border: InputBorder.none,
                     isDense: true,
@@ -750,12 +796,13 @@ class _MealsScreenState extends State<MealsScreen> {
       }
     }
 
-    addSection('Bữa Trước Tập ⚡ (Pre-Workout)', 'pre_workout');
-    addSection('Bữa Sau Tập 💪 (Post-Workout)', 'post_workout');
+    addSection('Đồ Uống & Ăn Vặt 🧋 (Cà phê, Trà sữa, Bánh tráng...)', 'drink_snack');
     addSection('Bữa Sáng ☀️ (Breakfast)', 'breakfast');
     addSection('Bữa Trưa 🍲 (Lunch)', 'lunch');
     addSection('Bữa Tối 🌙 (Dinner)', 'dinner');
-    addSection('Bữa Phụ 🍌 (Snack & Whey)', 'snack');
+    addSection('Bữa Trước Tập ⚡ (Pre-Workout)', 'pre_workout');
+    addSection('Bữa Sau Tập 💪 (Post-Workout)', 'post_workout');
+    addSection('Bữa Phụ Thể Hình 🍌 (Snack & Whey)', 'snack');
 
     return sections;
   }

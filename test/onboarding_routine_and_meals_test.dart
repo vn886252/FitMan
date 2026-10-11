@@ -31,7 +31,7 @@ void main() {
     expect(fit.weeklyPlan.containsKey(5), isTrue); // Thứ 6
   });
 
-  test('selecting a routine template allocates full 7-day Vietnamese meal plan', () {
+  test('selecting a routine template initializes clean 7-day meal log with no pre-ticked meals', () {
     // Phân bổ lịch ăn cho mục tiêu giảm mỡ (cut)
     applyDefaultWeeklyMealPlan('cut');
 
@@ -44,7 +44,22 @@ void main() {
     for (final day in days) {
       expect(decoded.containsKey(day), isTrue, reason: 'Lịch ăn phải chứa $day');
       final meals = decoded[day] as Map<String, dynamic>;
-      expect(meals.isNotEmpty, isTrue, reason: '$day phải có các món ăn phân bổ');
+      expect(meals.isEmpty, isTrue, reason: '$day ban đầu phải sạch, không tự động tick sẵn món');
     }
+  });
+
+  test('popular street drinks and snacks exist in catalog with calories and macros', () {
+    final caPheSua = kVietnameseMeals.firstWhere((m) => m.id == 'drink_ca_phe_sua_da');
+    expect(caPheSua.name, contains('Cà phê sữa đá'));
+    expect(caPheSua.calories, 195);
+    expect(caPheSua.protein, 3.5);
+
+    final traSua = kVietnameseMeals.firstWhere((m) => m.id == 'drink_tra_sua_tran_chau');
+    expect(traSua.name, contains('Trà sữa trân châu'));
+    expect(traSua.calories, 450);
+
+    final banhTrangTron = kVietnameseMeals.firstWhere((m) => m.id == 'snack_banh_trang_tron');
+    expect(banhTrangTron.name, contains('Bánh tráng trộn'));
+    expect(banhTrangTron.calories, 380);
   });
 }

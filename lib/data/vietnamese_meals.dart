@@ -1106,6 +1106,295 @@ const List<VietnameseMealOption> kVietnameseMeals = [
     icon: '🍠',
     category: 'snack',
   ),
+  // ─── ĐỒ UỐNG & ĂN VẶT PHỔ BIẾN 🧋 (CÀ PHÊ, TRÀ SỮA, BÁNH TRÁNG...) ────────
+  VietnameseMealOption(
+    id: 'drink_ca_phe_sua_da',
+    name: 'Cà phê sữa đá truyền thống',
+    portion: '1 ly 250ml (Cà phê phin + 40ml sữa đặc Ông Thọ)',
+    calories: 195,
+    protein: 3.5,
+    carbs: 34.0,
+    fat: 5.0,
+    icon: '☕',
+    category: 'drink_snack',
+    note: 'Lượng đường sữa đặc khá cao. Khi siết mỡ nên dặn ít sữa hoặc đổi sang sữa tươi không đường',
+  ),
+  VietnameseMealOption(
+    id: 'drink_ca_phe_den_khong_duong',
+    name: 'Cà phê đen đá nguyên chất (không đường)',
+    portion: '1 ly 200ml cà phê phin nguyên chất',
+    calories: 10,
+    protein: 0.8,
+    carbs: 1.5,
+    fat: 0.1,
+    icon: '☕',
+    category: 'drink_snack',
+    note: 'Caffeine kích thích trao đổi chất, tăng tập trung và hỗ trợ đốt mỡ trước buổi tập',
+  ),
+  VietnameseMealOption(
+    id: 'drink_ca_phe_den_duong',
+    name: 'Cà phê đen đá có đường',
+    portion: '1 ly 200ml cà phê phin + 2 thìa đường cát (15g)',
+    calories: 70,
+    protein: 0.8,
+    carbs: 16.5,
+    fat: 0.1,
+    icon: '☕',
+    category: 'drink_snack',
+    note: 'Năng lượng hấp thu nhanh từ đường, uống trước tập 30p giúp tăng sức mạnh',
+  ),
+  VietnameseMealOption(
+    id: 'drink_bac_xiu_da',
+    name: 'Bạc xỉu đá Sài Gòn',
+    portion: '1 ly 300ml (Nhiều sữa đặc + sữa tươi + chút cà phê phin)',
+    calories: 250,
+    protein: 5.5,
+    carbs: 42.0,
+    fat: 7.0,
+    icon: '🥛',
+    category: 'drink_snack',
+    note: 'Nhiều đường và béo ngậy, rất thích hợp cho gymer gầy muốn tăng cân (Bulking)',
+  ),
+  VietnameseMealOption(
+    id: 'drink_tra_sua_tran_chau',
+    name: 'Trà sữa trân châu truyền thống',
+    portion: '1 ly Size M 500ml (Trà đen + bột sữa + trân châu đen)',
+    calories: 450,
+    protein: 3.0,
+    carbs: 72.0,
+    fat: 16.0,
+    icon: '🧋',
+    category: 'drink_snack',
+    note: 'Lượng calo và đường tinh luyện rất cao, tương đương 1 bữa ăn chính. Nên hạn chế khi giảm mỡ',
+  ),
+  VietnameseMealOption(
+    id: 'drink_tra_sua_full_topping',
+    name: 'Trà sữa full topping (Size L)',
+    portion: '1 ly Size L 700ml (Trân châu đen + thạch phô mai + pudding trứng)',
+    calories: 620,
+    protein: 4.5,
+    carbs: 98.0,
+    fat: 24.0,
+    icon: '🧋',
+    category: 'drink_snack',
+    note: 'Năng lượng cực khủng, bằng cả 1 tô phở bò đặc biệt kèm quẩy',
+  ),
+  VietnameseMealOption(
+    id: 'snack_banh_trang_tron',
+    name: 'Bánh tráng trộn khô bò trứng cút',
+    portion: '1 bịch 150g (Bánh tráng, bò khô, xoài xanh, 2 trứng cút, tép, muối tôm, mỡ hành)',
+    calories: 380,
+    protein: 8.5,
+    carbs: 58.0,
+    fat: 14.0,
+    icon: '🥢',
+    category: 'drink_snack',
+    note: 'Món ăn vặt quốc dân; chứa nhiều tinh bột nhanh và muối tôm dễ giữ nước dưới da',
+  ),
+  VietnameseMealOption(
+    id: 'snack_banh_trang_nuong',
+    name: 'Bánh tráng nướng Đà Lạt',
+    portion: '1 cái nướng giòn (Trứng gà, tép khô, hành lá, xúc xích, phô mai lát)',
+    calories: 330,
+    protein: 9.0,
+    carbs: 42.0,
+    fat: 14.5,
+    icon: '🍕',
+    category: 'drink_snack',
+    note: 'Bánh tráng nướng than giòn rụm, calo đến từ sốt bơ và phô mai',
+  ),
+  VietnameseMealOption(
+    id: 'snack_banh_trang_cuon_bo',
+    name: 'Bánh tráng cuộn sốt bơ me',
+    portion: '1 phần 5 cuộn (Trứng cút, tép khô, sốt bơ trứng, hành phi, sốt me)',
+    calories: 420,
+    protein: 6.0,
+    carbs: 52.0,
+    fat: 21.0,
+    icon: '🌯',
+    category: 'drink_snack',
+    note: 'Sốt bơ chứa hàm lượng chất béo cao, cần chú ý khi tính macro trong ngày',
+  ),
+  VietnameseMealOption(
+    id: 'drink_tra_dao_cam_sa',
+    name: 'Trà đào cam sả',
+    portion: '1 ly 500ml + 3 miếng đào giòn ngâm đường',
+    calories: 160,
+    protein: 0.5,
+    carbs: 39.0,
+    fat: 0.2,
+    icon: '🍑',
+    category: 'drink_snack',
+    note: 'Chủ yếu là đường syrup từ quả đào ngâm, có thể giảm 50% đường khi gọi quán',
+  ),
+  VietnameseMealOption(
+    id: 'drink_tra_chanh_via_he',
+    name: 'Trà chanh / Trà tắc vỉa hè',
+    portion: '1 ly to 500ml (Trà nhài + nước cốt chanh/tắc + đường)',
+    calories: 110,
+    protein: 0.5,
+    carbs: 27.0,
+    fat: 0.1,
+    icon: '🍋',
+    category: 'drink_snack',
+    note: 'Giải khát thanh nhiệt ngày hè, đường cát trắng hấp thu nhanh',
+  ),
+  VietnameseMealOption(
+    id: 'drink_nuoc_mia_sieu_sach',
+    name: 'Nước mía siêu sạch ép tắc',
+    portion: '1 ly 350ml nước mía nguyên chất ép quả tắc',
+    calories: 180,
+    protein: 0.5,
+    carbs: 45.0,
+    fat: 0.2,
+    icon: '🎋',
+    category: 'drink_snack',
+    note: 'Đường mía tự nhiên giàu khoáng chất, bù glycogen cực nhanh sau khi tập ngoài trời',
+  ),
+  VietnameseMealOption(
+    id: 'drink_nuoc_dua_tuoi',
+    name: 'Nước dừa tươi nguyên trái (Dừa Xiêm)',
+    portion: '1 trái dừa xiêm (khoảng 300ml nước + một ít cơm dừa non)',
+    calories: 85,
+    protein: 2.0,
+    carbs: 15.0,
+    fat: 1.5,
+    icon: '🥥',
+    category: 'drink_snack',
+    note: 'Nước điện giải tự nhiên số 1 (Kali, Magie), chống chuột rút và bù nước hoàn hảo',
+  ),
+  VietnameseMealOption(
+    id: 'drink_sua_dau_nanh_it_duong',
+    name: 'Sữa đậu nành nguyên chất ít đường',
+    portion: '1 ly 300ml đậu nành tươi nấu thủ công',
+    calories: 120,
+    protein: 8.5,
+    carbs: 12.0,
+    fat: 4.5,
+    icon: '🥛',
+    category: 'drink_snack',
+    note: 'Giàu đạm thực vật isoflavone, hỗ trợ săn chắc và cân bằng mỡ máu',
+  ),
+  VietnameseMealOption(
+    id: 'drink_sinh_to_bo_sua',
+    name: 'Sinh tố bơ Đắk Lắk sữa đặc',
+    portion: '1 ly 350ml (Bơ sáp xay sữa tươi, sữa đặc, đá xay)',
+    calories: 360,
+    protein: 6.0,
+    carbs: 45.0,
+    fat: 18.0,
+    icon: '🥑',
+    category: 'drink_snack',
+    note: 'Chất béo đơn bất bão hòa cực tốt cho khớp và tim mạch, calo dồi dào',
+  ),
+  VietnameseMealOption(
+    id: 'snack_ca_vien_chien_xien',
+    name: 'Cá viên chiên / Xiên que thập cẩm',
+    portion: '1 đĩa 5 xiên (Cá viên, bò viên, tôm viên, đậu bắp chiên giòn)',
+    calories: 410,
+    protein: 14.0,
+    carbs: 32.0,
+    fat: 25.0,
+    icon: '🍢',
+    category: 'drink_snack',
+    note: 'Chiên ngập dầu nên lượng chất béo cao, nên chấm tương ớt vừa phải',
+  ),
+  VietnameseMealOption(
+    id: 'snack_bap_xao_bo_tep',
+    name: 'Bắp xào bơ tép khô hành lá',
+    portion: '1 hộp 150g (Bắp ngọt, bơ thực vật, tép ruốc, hành lá)',
+    calories: 320,
+    protein: 7.0,
+    carbs: 46.0,
+    fat: 12.0,
+    icon: '🌽',
+    category: 'drink_snack',
+    note: 'Cung cấp năng lượng carb phức và chất xơ, vị béo thơm hấp dẫn',
+  ),
+  VietnameseMealOption(
+    id: 'snack_bot_chien_trung',
+    name: 'Bột chiên 2 trứng truyền thống',
+    portion: '1 đĩa (Bột gạo chiên giòn, 2 trứng gà, đu đủ bào sợi, nước tương chua ngọt)',
+    calories: 480,
+    protein: 15.0,
+    carbs: 58.0,
+    fat: 21.0,
+    icon: '🍳',
+    category: 'drink_snack',
+    note: 'Nhiều đạm từ trứng nhưng bột chiên ngập dầu mỡ, chỉ nên ăn trong ngày xả (Cheat Day)',
+  ),
+  VietnameseMealOption(
+    id: 'snack_trung_vit_lon',
+    name: 'Trứng vịt lộn luộc + Rau răm gừng',
+    portion: '1 quả trứng vịt lộn luộc chín (chấm muối tiêu chanh, gừng sợi)',
+    calories: 182,
+    protein: 13.6,
+    carbs: 2.1,
+    fat: 12.4,
+    icon: '🥚',
+    category: 'drink_snack',
+    note: 'Siêu thực phẩm tự nhiên giàu đạm, sắt, canxi và vitamin A hồi phục thể lực nhanh',
+  ),
+  VietnameseMealOption(
+    id: 'snack_nem_chua_ran',
+    name: 'Nem chua rán tẩm bột chiên xù',
+    portion: '1 đĩa 5 chiếc nem chua lăn bột chiên vàng giòn',
+    calories: 360,
+    protein: 15.0,
+    carbs: 26.0,
+    fat: 22.0,
+    icon: '🥢',
+    category: 'drink_snack',
+    note: 'Món ăn vặt khoái khẩu phố cổ, vỏ giòn ruột dẻo thơm',
+  ),
+  VietnameseMealOption(
+    id: 'snack_banh_bao_thit_trung',
+    name: 'Bánh bao nhân thịt nạc + Trứng cút',
+    portion: '1 chiếc 150g (Vỏ bột hấp mềm, thịt nạc băm, mộc nhĩ, 1 trứng cút)',
+    calories: 340,
+    protein: 14.0,
+    carbs: 46.0,
+    fat: 11.0,
+    icon: '🥟',
+    category: 'drink_snack',
+    note: 'Món lót dạ tiện lợi trước hoặc sau giờ làm việc, ít dầu mỡ hơn đồ chiên',
+  ),
+  VietnameseMealOption(
+    id: 'snack_xoi_man_thap_cam',
+    name: 'Xôi mặn thập cẩm lạp xưởng chà bông',
+    portion: '1 gói lá chuối 200g (Nếp dẻo, lạp xưởng, chà bông, mỡ hành, đậu phộng)',
+    calories: 520,
+    protein: 16.0,
+    carbs: 76.0,
+    fat: 17.0,
+    icon: '🍚',
+    category: 'drink_snack',
+    note: 'Năng lượng dồi dào, tinh bột nếp no lâu cho những ngày cần tập thể lực nặng',
+  ),
+  VietnameseMealOption(
+    id: 'snack_che_dau_do_nuoc_cot_dua',
+    name: 'Chè đậu đỏ hạt sen nước cốt dừa',
+    portion: '1 ly 200g (Đậu đỏ ninh nhừ, hạt sen bùi, nước cốt dừa béo ngậy)',
+    calories: 260,
+    protein: 8.0,
+    carbs: 48.0,
+    fat: 5.0,
+    icon: '🥣',
+    category: 'drink_snack',
+    note: 'Đậu đỏ giàu khoáng chất kali và chất xơ, vị ngọt thanh giải nhiệt',
+  ),
+  VietnameseMealOption(
+    id: 'snack_khoai_lang_lac_phomai',
+    name: 'Khoai lang lắc phô mai chiên giòn',
+    portion: '1 bịch 150g khoai lang vàng chiên lắc bột phô mai mặn ngọt',
+    calories: 350,
+    protein: 5.0,
+    carbs: 56.0,
+    fat: 12.0,
+    icon: '🍠',
+    category: 'drink_snack',
+    note: 'Món ăn vặt thơm giòn, nhiều carbohydrate cho buổi chiều tràn đầy năng lượng',
+  ),
 ];
 
 List<VietnameseMealOption> getVietnameseMealsByCategory(String cat) {
@@ -1122,87 +1411,15 @@ List<VietnameseMealOption> searchVietnameseMeals(String query) {
   }).toList();
 }
 
-/// Tự động phân bổ lịch ăn mẫu cả tuần dựa trên mục tiêu thể hình hoặc giáo án
+/// Khởi tạo lịch ăn 7 ngày rỗng (không tự động tick sẵn món nào để người dùng tự chọn)
 Map<String, Map<String, double>> buildDefaultWeeklyMealPlan({
   required String fitnessGoal, // 'cut', 'bulk', 'maintain'
 }) {
   const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
   final Map<String, Map<String, double>> plan = {};
-
-  final isCut = fitnessGoal == 'cut';
-  final isBulk = fitnessGoal == 'bulk';
-  final portionFactor = isBulk ? 1.25 : (isCut ? 0.9 : 1.0);
-
-  // Mẫu món cho từng ngày (Sáng, Trưa, Trước/Sau tập, Tối, [Phụ])
-  final dailyTemplates = [
-    // Thứ 2
-    [
-      isCut ? 'chao_yen_mach_uc_ga' : 'pho_bo_tai_nam_bac',
-      'com_uc_ga_luoc_bong_cai',
-      'pre_yen_mach_chuoi_matong',
-      isCut ? 'salad_uc_ga_trung_luoc' : 'canh_chua_ca_loc_com',
-      if (isBulk) 'snack_khoai_tim_hap_sua',
-    ],
-    // Thứ 3
-    [
-      'com_tam_suon_nuong_trung',
-      'com_ca_thu_sot_ca_chua',
-      'post_whey_chuoi_su',
-      'bo_xao_can_tay_com_lut',
-      if (isBulk) 'snack_sinh_to_bo_whey',
-    ],
-    // Thứ 4
-    [
-      'bun_bo_hue_nac_dac_biet',
-      'com_tom_rim_thit_nac',
-      'pre_khoai_mat_trung_luoc',
-      'tom_hap_nuoc_dua_rau_luoc',
-      if (isBulk) 'snack_thanh_protein_socola',
-    ],
-    // Thứ 5
-    [
-      'banh_mi_3_trung_opla',
-      'com_bo_luc_lac_khoai_tay',
-      'post_whey_chuoi_su',
-      'dau_hu_nhoi_thit_sot_ca',
-      if (isBulk) 'snack_bo_dam_sua_chua',
-    ],
-    // Thứ 6
-    [
-      'pho_ga_xe_luon',
-      'com_ca_loc_kho_to',
-      'pre_bap_ngo_ngot_luoc',
-      'ca_hoi_ap_chao_khoai_nghien',
-      if (isBulk) 'snack_khoai_tim_hap_sua',
-    ],
-    // Thứ 7
-    [
-      'bun_cha_ha_noi_nac',
-      'com_ga_hap_la_chanh',
-      'post_whey_chuoi_su',
-      'lau_ga_la_e_it_mo',
-      if (isBulk) 'snack_sinh_to_bo_whey',
-    ],
-    // Chủ Nhật
-    [
-      'bun_rieu_bap_bo',
-      'com_muc_xao_can_tay',
-      'pre_banh_mi_bo_dau_phong',
-      'ga_ham_hat_sen_tao_do',
-      if (isBulk) 'snack_pho_mai_con_bo_cuoi',
-    ],
-  ];
-
-  for (var i = 0; i < days.length; i++) {
-    final dayName = days[i];
-    final items = dailyTemplates[i];
-    final dayMap = <String, double>{};
-    for (final mealId in items) {
-      dayMap[mealId] = portionFactor;
-    }
-    plan[dayName] = dayMap;
+  for (final dayName in days) {
+    plan[dayName] = <String, double>{};
   }
-
   return plan;
 }
 
