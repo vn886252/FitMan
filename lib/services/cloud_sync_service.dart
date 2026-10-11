@@ -40,10 +40,6 @@ class CloudSyncService extends ChangeNotifier {
 
       FirebaseAuth.instance.authStateChanges().listen((user) {
         notifyListeners();
-        if (user != null) {
-          // Tự động đồng bộ nền khi người dùng đăng nhập
-          syncToCloud();
-        }
       });
     } catch (e) {
       // Firebase chưa được cấu hình hoặc chạy trong môi trường không hỗ trợ
@@ -63,14 +59,20 @@ class CloudSyncService extends ChangeNotifier {
         email: email.trim(),
         password: password,
       );
-      await syncToCloud();
+      try {
+        await syncToCloud();
+      } catch (_) {}
       return null;
     } on FirebaseAuthException catch (e) {
-      _lastError = e.message;
-      return e.message ?? 'Đăng ký thất bại';
+      if (e.code == 'operation-not-allowed') {
+        _lastError = 'Chưa bật Email/Password trên Firebase Console.';
+      } else {
+        _lastError = e.message ?? 'Đăng ký thất bại (${e.code})';
+      }
+      return _lastError;
     } catch (e) {
       _lastError = e.toString();
-      return 'Lỗi không xác định: $e';
+      return 'Lỗi: $e';
     }
   }
 
@@ -83,14 +85,20 @@ class CloudSyncService extends ChangeNotifier {
         email: email.trim(),
         password: password,
       );
-      await restoreFromCloud();
+      try {
+        await restoreFromCloud();
+      } catch (_) {}
       return null;
     } on FirebaseAuthException catch (e) {
-      _lastError = e.message;
-      return e.message ?? 'Đăng nhập thất bại';
+      if (e.code == 'operation-not-allowed') {
+        _lastError = 'Chưa bật Email/Password trên Firebase Console.';
+      } else {
+        _lastError = e.message ?? 'Đăng nhập thất bại (${e.code})';
+      }
+      return _lastError;
     } catch (e) {
       _lastError = e.toString();
-      return 'Lỗi không xác định: $e';
+      return 'Lỗi: $e';
     }
   }
 
@@ -100,21 +108,32 @@ class CloudSyncService extends ChangeNotifier {
     try {
       _lastError = null;
       await FirebaseAuth.instance.signInAnonymously();
-      await syncToCloud();
+      try {
+        await syncToCloud();
+      } catch (_) {}
       return null;
     } on FirebaseAuthException catch (e) {
-      _lastError = e.message;
-      return e.message ?? 'Đăng nhập thất bại';
+      debugPrint('FirebaseAuthException anonymous: ${e.code} ${e.message}');
+      if (e.code == 'operation-not-allowed' || e.code == 'admin-restricted-operation') {
+        _lastError = 'Chưa bật Đăng nhập ẩn danh trên Firebase Console (Vào Authentication > Sign-in method > bật Anonymous).';
+      } else {
+        _lastError = e.message ?? 'Đăng nhập ẩn danh thất bại (${e.code})';
+      }
+      return _lastError;
     } catch (e) {
       _lastError = e.toString();
-      return 'Lỗi không xác định: $e';
+      return 'Lỗi: $e';
     }
   }
 
   /// Đăng xuất
   Future<void> signOut() async {
     if (!_initialized) return;
-    await FirebaseAuth.instance.signOut();
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      debugPrint('SignOut error: $e');
+    }
     notifyListeners();
   }
 
@@ -129,12 +148,11 @@ class CloudSyncService extends ChangeNotifier {
     try {
       final user = FirebaseAuth.instance.currentUser!;
       final exportData = fit.exportJson();
-      final dataMap = jsonDecode(exportData) as Map<String, dynamic>;
 
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'updatedAt': FieldValue.serverTimestamp(),
         'email': user.email ?? 'anonymous',
-        'backup': dataMap,
+        'backupJson': exportData,
       }, SetOptions(merge: true));
 
       _lastSyncTime = DateTime.now();
@@ -166,9 +184,10 @@ class CloudSyncService extends ChangeNotifier {
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
       if (doc.exists && doc.data() != null) {
-        final backup = doc.data()!['backup'];
-        if (backup != null) {
-          final jsonString = jsonEncode(backup);
+        final data = doc.data()!;
+        final backupJson = data['backupJson'] as String?;
+        final jsonString = backupJson ?? (data['backup'] != null ? jsonEncode(data['backup']) : null);
+        if (jsonString != null) {
           final ok = fit.importJson(jsonString);
           if (ok) {
             fit.persistNow();
