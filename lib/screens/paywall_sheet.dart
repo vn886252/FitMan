@@ -40,90 +40,181 @@ class _PaywallSheetState extends State<PaywallSheet> {
 
     final sub = SubscriptionService.instance;
     final isLifetime = _selectedPlan == 'lifetime';
-    final amount = isLifetime ? '199.000đ' : '20.000đ';
+    final amountText = isLifetime ? '199.000đ' : '20.000đ';
+    final rawAmount = isLifetime ? 199000 : 20000;
     final planName = isLifetime ? '${"Trọn Đời VIP"}' : '${"Gói 1 Tuần"}';
+    const bankName = 'Techcombank';
+    const accountNumber = '3386111168';
+    const accountName = 'HO KINH DOANH CUA HANG FITMAN';
+    const transferContent = 'FITMAN PRO';
+
+    final qrUrl = 'https://img.vietqr.io/image/TCB-$accountNumber-compact2.png?amount=$rawAmount&addInfo=$transferContent&accountName=${Uri.encodeComponent(accountName)}';
 
     showAppDialog<void>(
       context: context,
       builder: (dlgContext) => AlertDialog(
         backgroundColor: context.gc.bgRaised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF47E1D).withValues(alpha: 0.16),
+                color: const Color(0xFFE51A24).withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(PhosphorIconsFill.crown, color: Color(0xFFF47E1D), size: 24),
+              child: const Icon(PhosphorIconsFill.qrCode, color: Color(0xFFE51A24), size: 24),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                '${"Kích Hoạt "} $planName',
-                style: AppTheme.f(17, weight: FontWeight.w800, color: context.gc.text),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: context.gc.bgRaised2,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: context.gc.border),
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${"Số tiền thanh toán: "} $amount',
-                    style: AppTheme.f(14.5, weight: FontWeight.w800, color: const Color(0xFFF47E1D)),
+                    '${"Thanh Toán VietQR"}',
+                    style: AppTheme.f(17, weight: FontWeight.w800, color: context.gc.text),
                   ),
-                  const SizedBox(height: 6),
                   Text(
-                    '${"Nội dung: FITMAN PRO"}',
-                    style: AppTheme.f(12.5, weight: FontWeight.w600, color: context.gc.textSecondary),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${"Hỗ trợ VietQR / Chuyển khoản ngân hàng 24/7."}',
-                    style: AppTheme.f(12, weight: FontWeight.w500, color: context.gc.textTertiary),
+                    '${"Kích hoạt "} $planName · $amountText',
+                    style: AppTheme.f(12.5, weight: FontWeight.w600, color: const Color(0xFFF47E1D)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
-            Row(
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(PhosphorIconsRegular.cloudCheck, size: 18, color: Color(0xFF54B979)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${"Tự động lưu gói VIP vào tài khoản Cloud của bạn."}',
-                    style: AppTheme.f(12, weight: FontWeight.w600, color: context.gc.textSecondary),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      qrUrl,
+                      width: 230,
+                      height: 260,
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return const SizedBox(
+                          width: 230,
+                          height: 260,
+                          child: Center(
+                            child: CircularProgressIndicator(color: Color(0xFFE51A24), strokeWidth: 2.5),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stack) {
+                        return Container(
+                          width: 230,
+                          height: 180,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(PhosphorIconsRegular.wifiSlash, color: Colors.grey, size: 36),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${"Quý khách vui lòng chuyển khoản theo thông tin bên dưới."}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 12, color: Colors.black87),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${"Mở app ngân hàng bất kỳ để quét mã tự động 24/7"}',
+                  style: AppTheme.f(11.5, weight: FontWeight.w500, color: context.gc.textTertiary),
+                ),
+                const SizedBox(height: 14),
+                _qrDetailTile(
+                  context: dlgContext,
+                  label: '${"Ngân hàng"}',
+                  value: '$bankName (TCB)',
+                ),
+                _qrDetailTile(
+                  context: dlgContext,
+                  label: '${"Số tài khoản"}',
+                  value: accountNumber,
+                  copyValue: accountNumber,
+                ),
+                _qrDetailTile(
+                  context: dlgContext,
+                  label: '${"Chủ tài khoản"}',
+                  value: accountName,
+                ),
+                _qrDetailTile(
+                  context: dlgContext,
+                  label: '${"Số tiền"}',
+                  value: amountText,
+                  copyValue: '$rawAmount',
+                ),
+                _qrDetailTile(
+                  context: dlgContext,
+                  label: '${"Nội dung chuyển khoản"}',
+                  value: transferContent,
+                  copyValue: transferContent,
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF54B979).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(PhosphorIconsRegular.cloudCheck, size: 16, color: Color(0xFF54B979)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${"Gói VIP tự động đồng bộ lên Cloud ngay khi kích hoạt."}',
+                          style: AppTheme.f(11.5, weight: FontWeight.w600, color: const Color(0xFF54B979)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dlgContext),
-            child: Text('${"Để sau"}', style: TextStyle(color: context.gc.textTertiary)),
+            child: Text('${"Đóng"}', style: TextStyle(color: context.gc.textTertiary)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFF47E1D),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              elevation: 0,
             ),
             onPressed: () async {
               Navigator.pop(dlgContext);
@@ -140,8 +231,68 @@ class _PaywallSheetState extends State<PaywallSheet> {
                 accent: const Color(0xFFF47E1D),
               );
             },
-            child: Text('${"Kích hoạt ngay"}', style: const TextStyle(fontWeight: FontWeight.w800)),
+            child: Text('${"Tôi Đã Chuyển Tiền"}', style: const TextStyle(fontWeight: FontWeight.w800)),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _qrDetailTile({
+    required BuildContext context,
+    required String label,
+    required String value,
+    String? copyValue,
+  }) {
+    final gc = context.gc;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: gc.bgRaised2,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: gc.border.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppTheme.f(10.5, weight: FontWeight.w600, color: gc.textTertiary),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: AppTheme.f(13, weight: FontWeight.w700, color: gc.text),
+                ),
+              ],
+            ),
+          ),
+          if (copyValue != null)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: copyValue));
+                HapticFeedback.lightImpact();
+                showNotchToast(
+                  context,
+                  '${"Đã sao chép: "} $copyValue',
+                  icon: PhosphorIconsRegular.copy,
+                  accent: const Color(0xFFF47E1D),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF47E1D).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(PhosphorIconsRegular.copy, size: 16, color: Color(0xFFF47E1D)),
+              ),
+            ),
         ],
       ),
     );
