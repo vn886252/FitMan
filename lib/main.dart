@@ -26,6 +26,47 @@ Future<void> main() async {
     systemStatusBarContrastEnforced: false,
   ));
 
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('FitMan Error: ${details.exceptionAsString()}');
+  };
+
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Material(
+      color: const Color(0xFF141414),
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.fitness_center_rounded, color: Color(0xFFF47E1D), size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  '${"FitMan đang đồng bộ lại giao diện..."}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () {
+                    fit.resetRoute('home');
+                    fit.persistNow();
+                  },
+                  child: Text(
+                    '${"Chạm để quay về Trang Chủ"}',
+                    style: const TextStyle(color: Color(0xFFF47E1D), fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  };
+
   await initializeDateFormatting();
   await Store.instance.init();
   await MediaStore.init();

@@ -1615,6 +1615,9 @@ void _showCloudSyncSheet(BuildContext context) {
   );
 }
 
+@visibleForTesting
+void showCloudSyncSheetForTest(BuildContext context) => _showCloudSyncSheet(context);
+
 class _CloudSyncSheetBody extends StatefulWidget {
   const _CloudSyncSheetBody();
 

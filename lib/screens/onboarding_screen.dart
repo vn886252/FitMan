@@ -36,18 +36,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_selectedTemplate != null) return _selectedTemplate!;
     final p = fit.profile;
     if (p.isCutting || p.bmi >= 24.0) {
-      return kProgramTemplates.firstWhere((t) => t.id == 'weight_loss_cut');
+      return kProgramTemplates.firstWhere((t) => t.id == 'weight_loss_cut',
+          orElse: () => kProgramTemplates.first);
     }
     if (p.isBulking || p.bmi < 19.0) {
-      return kProgramTemplates.firstWhere((t) => t.id == 'mass_gain_bulk');
+      return kProgramTemplates.firstWhere((t) => t.id == 'mass_gain_bulk',
+          orElse: () => kProgramTemplates.first);
     }
     if (p.isBeginner) {
-      return kProgramTemplates.firstWhere((t) => t.id == 'beginner_friendly');
+      return kProgramTemplates.firstWhere((t) => t.id == 'beginner_friendly',
+          orElse: () => kProgramTemplates.first);
     }
     if (p.isAdvanced) {
-      return kProgramTemplates.firstWhere((t) => t.id == 'ppl_6day');
+      return kProgramTemplates.firstWhere((t) => t.id == 'ppl_6day',
+          orElse: () => kProgramTemplates.first);
     }
-    return kProgramTemplates.firstWhere((t) => t.id == 'upperlower');
+    return kProgramTemplates.firstWhere((t) => t.id == 'upperlower',
+        orElse: () => kProgramTemplates.first);
   }
 
   @override
@@ -605,15 +610,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final title = '${"Chọn Giáo Án Tập Luyện"}';
     final why = '${"Dựa vào thể trạng, FitMan sẽ tự động xếp lịch tập cả tuần và phân bổ thực đơn món Việt chuẩn dinh dưỡng cho bạn."}';
 
-    final displayedTemplates = [
-      kProgramTemplates.firstWhere((t) => t.id == 'weight_loss_cut'),
-      kProgramTemplates.firstWhere((t) => t.id == 'mass_gain_bulk'),
-      kProgramTemplates.firstWhere((t) => t.id == 'beginner_friendly'),
-      kProgramTemplates.firstWhere((t) => t.id == 'ppl'),
-      kProgramTemplates.firstWhere((t) => t.id == 'upperlower'),
-      kProgramTemplates.firstWhere((t) => t.id == 'ppl_6day'),
-      kProgramTemplates.firstWhere((t) => t.id == 'calisthenics'),
+    const targetIds = [
+      'weight_loss_cut',
+      'mass_gain_bulk',
+      'beginner_friendly',
+      'ppl',
+      'upperlower',
+      'ppl_6day',
+      'home',
     ];
+
+    final displayedTemplates = <ProgramTemplate>[];
+    for (final id in targetIds) {
+      final found = kProgramTemplates.where((t) => t.id == id).firstOrNull;
+      if (found != null) displayedTemplates.add(found);
+    }
 
     return _step(
       gc,
@@ -677,7 +688,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         desc = '${"Cường độ cao 6 buổi/tuần dành cho gymer lâu năm muốn tối đa hóa phì đại cơ."}';
         if (p.isAdvanced) badge = '${"🏆 VẬN ĐỘNG VIÊN"}';
         break;
-      case 'calisthenics':
+      case 'home':
         icon = '🤸';
         desc = '${"Tập luyện không cần tạ, sử dụng trọng lượng cơ thể linh hoạt tại nhà hoặc ngoài trời."}';
         break;
