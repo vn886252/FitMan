@@ -32,7 +32,9 @@ import '../screens/timeline_screen.dart';
 import '../screens/tool_detail_screen.dart';
 import '../screens/tools_screen.dart';
 import '../screens/train_screen.dart';
+import '../screens/paywall_sheet.dart';
 import '../services/incoming_share.dart';
+import '../services/subscription_service.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -609,6 +611,10 @@ class _NavBarState extends State<_NavBar> {
   }
 
   void _play(BuildContext context) {
+    if (!SubscriptionService.instance.hasAccess) {
+      showPaywallSheet(context);
+      return;
+    }
     final planned = fit.todayRoutine;
     if (planned != null && planned.exerciseIds.isNotEmpty) {
       fit.startRoutine(planned);

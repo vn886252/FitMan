@@ -3,13 +3,19 @@ import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 import '../l10n/l10n.dart';
 import '../models/workout.dart';
+import '../services/subscription_service.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass.dart';
 import '../widgets/ui_kit.dart';
+import 'paywall_sheet.dart';
 
 void showStartSheet(BuildContext context, {DateTime? day}) {
+  if (!SubscriptionService.instance.hasAccess) {
+    showPaywallSheet(context);
+    return;
+  }
   showAppSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,

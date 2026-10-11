@@ -42,7 +42,7 @@ class AboutScreen extends StatelessWidget {
             _hero(gc),
             const SizedBox(height: 20),
             _group(gc, [
-              (PhosphorIconsRegular.gift, t.freeForever, t.freeForeverWhy),
+              (PhosphorIconsRegular.prohibit, t.freeForever, t.freeForeverWhy),
               (PhosphorIconsRegular.wifiSlash, t.fullyOffline, t.fullyOfflineWhy),
               (PhosphorIconsRegular.export, t.yoursToTake, t.yoursToTakeWhy),
             ]),

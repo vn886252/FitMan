@@ -19,7 +19,9 @@ import '../widgets/set_kind.dart';
 import '../widgets/svg_icon.dart';
 import '../widgets/timer_panel.dart';
 import '../widgets/ui_kit.dart';
+import '../services/subscription_service.dart';
 import 'exercises_screen.dart';
+import 'paywall_sheet.dart';
 import 'plan_import_sheet.dart';
 
 class RoutineEditScreen extends StatefulWidget {
@@ -99,7 +101,13 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
                   child: PrimaryButton(
                     label: t.startWorkout,
                     icon: Ic.play,
-                    onTap: () => fit.startRoutine(routine),
+                    onTap: () {
+                      if (!SubscriptionService.instance.hasAccess) {
+                        showPaywallSheet(context);
+                        return;
+                      }
+                      fit.startRoutine(routine);
+                    },
                   ),
                 ),
               ]),

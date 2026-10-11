@@ -3,6 +3,8 @@ import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 import '../l10n/l10n.dart';
 import '../models/workout.dart';
+import '../screens/paywall_sheet.dart';
+import '../services/subscription_service.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -176,7 +178,15 @@ class RoutineFolder extends StatelessWidget {
               height: 46,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: n > 0 ? () => fit.startRoutine(r) : () => fit.openRoutine(r.id),
+                onTap: n > 0
+                    ? () {
+                        if (!SubscriptionService.instance.hasAccess) {
+                          showPaywallSheet(context);
+                          return;
+                        }
+                        fit.startRoutine(r);
+                      }
+                    : () => fit.openRoutine(r.id),
                 child: Center(
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     Icon(n > 0 ? PhosphorIconsFill.play : PhosphorIconsBold.plus, size: 12, color: gc.textSecondary),

@@ -13,6 +13,8 @@ import '../widgets/liquid_notch.dart';
 import '../widgets/routine_folder.dart';
 import '../widgets/svg_icon.dart';
 import '../widgets/ui_kit.dart';
+import '../services/subscription_service.dart';
+import 'paywall_sheet.dart';
 import 'plan_import_sheet.dart';
 
 class RoutinesScreen extends StatelessWidget {
@@ -449,6 +451,10 @@ class RoutinesScreen extends StatelessWidget {
               if (r.exerciseIds.isNotEmpty)
                 OptionItem(titleCase(t.startWorkout), icon: PhosphorIconsRegular.play, onTap: () {
                   Navigator.pop(sheet);
+                  if (!SubscriptionService.instance.hasAccess) {
+                    showPaywallSheet(context);
+                    return;
+                  }
                   fit.startRoutine(r);
                 }),
               OptionItem(t.shareRoutine, icon: PhosphorIconsRegular.shareNetwork, onTap: () {

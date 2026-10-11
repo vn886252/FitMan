@@ -1654,10 +1654,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get aboutBlurb => 'Được xây dựng bởi người tập gym, dành cho người tập gym.';
 
   @override
-  String get freeForever => 'Hoàn toàn miễn phí';
+  String get freeForever => 'Không bao giờ có quảng cáo';
 
   @override
-  String get freeForeverWhy => 'Không quảng cáo, không thu phí ngầm, không bắt đăng ký tài khoản.';
+  String get freeForeverWhy => 'Tập trung 100% vào việc tập luyện, trải nghiệm mượt mà không bị làm phiền.';
 
   @override
   String get fullyOffline => 'Hoạt động Offline 100%';
