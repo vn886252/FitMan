@@ -1,3 +1,6 @@
+import 'dart:convert';
+import '../services/local_store.dart';
+
 /// Dữ liệu thực đơn món ăn Việt Nam chuẩn dinh dưỡng cho thể hình (90 món phong phú)
 class VietnameseMealOption {
   final String id;
@@ -1118,3 +1121,93 @@ List<VietnameseMealOption> searchVietnameseMeals(String query) {
         (m.note?.toLowerCase().contains(q) ?? false);
   }).toList();
 }
+
+/// Tự động phân bổ lịch ăn mẫu cả tuần dựa trên mục tiêu thể hình hoặc giáo án
+Map<String, Map<String, double>> buildDefaultWeeklyMealPlan({
+  required String fitnessGoal, // 'cut', 'bulk', 'maintain'
+}) {
+  const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+  final Map<String, Map<String, double>> plan = {};
+
+  final isCut = fitnessGoal == 'cut';
+  final isBulk = fitnessGoal == 'bulk';
+  final portionFactor = isBulk ? 1.25 : (isCut ? 0.9 : 1.0);
+
+  // Mẫu món cho từng ngày (Sáng, Trưa, Trước/Sau tập, Tối, [Phụ])
+  final dailyTemplates = [
+    // Thứ 2
+    [
+      isCut ? 'chao_yen_mach_uc_ga' : 'pho_bo_tai_nam_bac',
+      'com_uc_ga_luoc_bong_cai',
+      'pre_yen_mach_chuoi_matong',
+      isCut ? 'salad_uc_ga_trung_luoc' : 'canh_chua_ca_loc_com',
+      if (isBulk) 'snack_khoai_tim_hap_sua',
+    ],
+    // Thứ 3
+    [
+      'com_tam_suon_nuong_trung',
+      'com_ca_thu_sot_ca_chua',
+      'post_whey_chuoi_su',
+      'bo_xao_can_tay_com_lut',
+      if (isBulk) 'snack_sinh_to_bo_whey',
+    ],
+    // Thứ 4
+    [
+      'bun_bo_hue_nac_dac_biet',
+      'com_tom_rim_thit_nac',
+      'pre_khoai_mat_trung_luoc',
+      'tom_hap_nuoc_dua_rau_luoc',
+      if (isBulk) 'snack_thanh_protein_socola',
+    ],
+    // Thứ 5
+    [
+      'banh_mi_3_trung_opla',
+      'com_bo_luc_lac_khoai_tay',
+      'post_whey_chuoi_su',
+      'dau_hu_nhoi_thit_sot_ca',
+      if (isBulk) 'snack_bo_dam_sua_chua',
+    ],
+    // Thứ 6
+    [
+      'pho_ga_xe_luon',
+      'com_ca_loc_kho_to',
+      'pre_bap_ngo_ngot_luoc',
+      'ca_hoi_ap_chao_khoai_nghien',
+      if (isBulk) 'snack_khoai_tim_hap_sua',
+    ],
+    // Thứ 7
+    [
+      'bun_cha_ha_noi_nac',
+      'com_ga_hap_la_chanh',
+      'post_whey_chuoi_su',
+      'lau_ga_la_e_it_mo',
+      if (isBulk) 'snack_sinh_to_bo_whey',
+    ],
+    // Chủ Nhật
+    [
+      'bun_rieu_bap_bo',
+      'com_muc_xao_can_tay',
+      'pre_banh_mi_bo_dau_phong',
+      'ga_ham_hat_sen_tao_do',
+      if (isBulk) 'snack_pho_mai_con_bo_cuoi',
+    ],
+  ];
+
+  for (var i = 0; i < days.length; i++) {
+    final dayName = days[i];
+    final items = dailyTemplates[i];
+    final dayMap = <String, double>{};
+    for (final mealId in items) {
+      dayMap[mealId] = portionFactor;
+    }
+    plan[dayName] = dayMap;
+  }
+
+  return plan;
+}
+
+void applyDefaultWeeklyMealPlan(String fitnessGoal) {
+  final plan = buildDefaultWeeklyMealPlan(fitnessGoal: fitnessGoal);
+  Store.instance.setNote('vietnamese_meals_eaten', jsonEncode(plan));
+}
+

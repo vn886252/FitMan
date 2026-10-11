@@ -1,9 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 import '../catalog/exercise_catalog.dart';
+import '../catalog/program_templates.dart';
+import '../data/vietnamese_meals.dart';
 import '../l10n/l10n.dart';
+import '../models/profile.dart';
+import '../services/local_store.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -23,8 +28,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _page = PageController();
   late final TextEditingController _name = TextEditingController();
   int _index = 0;
-  static const _last = 5;
+  static const _last = 6;
   final Map<String, Set<String>> _places = {};
+  ProgramTemplate? _selectedTemplate;
+
+  ProgramTemplate get _effectiveTemplate {
+    if (_selectedTemplate != null) return _selectedTemplate!;
+    final p = fit.profile;
+    if (p.isCutting || p.bmi >= 24.0) {
+      return kProgramTemplates.firstWhere((t) => t.id == 'weight_loss_cut');
+    }
+    if (p.isBulking || p.bmi < 19.0) {
+      return kProgramTemplates.firstWhere((t) => t.id == 'mass_gain_bulk');
+    }
+    if (p.isBeginner) {
+      return kProgramTemplates.firstWhere((t) => t.id == 'beginner_friendly');
+    }
+    if (p.isAdvanced) {
+      return kProgramTemplates.firstWhere((t) => t.id == 'ppl_6day');
+    }
+    return kProgramTemplates.firstWhere((t) => t.id == 'upperlower');
+  }
 
   @override
   void dispose() {
@@ -50,6 +74,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (id.isNotEmpty) first ??= id;
     }
     if (first != null && fit.activePlaceId != first) fit.setActivePlace(first);
+
+    // 1. Áp dụng giáo án đã chọn vào Lịch tuần
+    final template = _effectiveTemplate;
+    fit.applyTemplate(template, forceSchedule: true);
+
+    // Cập nhật số buổi tập mục tiêu theo đúng số ngày của giáo án
+    final daysCount = template.days.length;
+    fit.updateProfile(weeklyGoalDelta: daysCount - fit.profile.weeklyGoal);
+
+    // 2. Cập nhật mục tiêu thể hình phù hợp
+    String targetGoal = 'maintain';
+    if (template.id == 'weight_loss_cut' || fit.profile.bmi >= 24.0) {
+      targetGoal = 'cut';
+    } else if (template.id == 'mass_gain_bulk' || fit.profile.bmi < 19.0) {
+      targetGoal = 'bulk';
+    }
+    fit.updateProfile(fitnessGoal: targetGoal);
+
+    // 3. Tự động phân bổ lịch ăn món Việt 7 ngày cho cả tuần
+    applyDefaultWeeklyMealPlan(targetGoal);
+
+    // Thiết lập lượng nước uống ban đầu
+    try {
+      const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+      Store.instance.setNote('vietnamese_water_log', jsonEncode({for (final d in days) d: 0}));
+    } catch (_) {}
+
     fit.completeOnboarding();
   }
 
@@ -78,6 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       _nameStep(gc),
                       _bodyStep(gc),
                       _experienceStep(gc),
+                      _programStep(gc),
                       _goalStep(gc),
                       _placeStep(gc),
                     ],
@@ -546,11 +598,199 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Widget _programStep(GymColors gc) {
+    final effective = _effectiveTemplate;
+    final p = fit.profile;
+
+    final title = '${"Chọn Giáo Án Tập Luyện"}';
+    final why = '${"Dựa vào thể trạng, FitMan sẽ tự động xếp lịch tập cả tuần và phân bổ thực đơn món Việt chuẩn dinh dưỡng cho bạn."}';
+
+    final displayedTemplates = [
+      kProgramTemplates.firstWhere((t) => t.id == 'weight_loss_cut'),
+      kProgramTemplates.firstWhere((t) => t.id == 'mass_gain_bulk'),
+      kProgramTemplates.firstWhere((t) => t.id == 'beginner_friendly'),
+      kProgramTemplates.firstWhere((t) => t.id == 'ppl'),
+      kProgramTemplates.firstWhere((t) => t.id == 'upperlower'),
+      kProgramTemplates.firstWhere((t) => t.id == 'ppl_6day'),
+      kProgramTemplates.firstWhere((t) => t.id == 'calisthenics'),
+    ];
+
+    return _step(
+      gc,
+      step: 4,
+      title: title,
+      why: why,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final template in displayedTemplates) ...[
+            _programCard(gc, p, template, isSelected: template.id == effective.id),
+            const SizedBox(height: 12),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _programCard(
+    GymColors gc,
+    Profile p,
+    ProgramTemplate template, {
+    required bool isSelected,
+  }) {
+    String icon = '⚡';
+    String desc = '';
+    String? badge;
+
+    switch (template.id) {
+      case 'weight_loss_cut':
+        icon = '🔥';
+        desc = '${"Đốt mỡ toàn thân, tăng nhịp tim và săn chắc vùng bụng với thực đơn thâm hụt calo."}';
+        if (p.isCutting || p.bmi >= 24.0) badge = '${"⚡ KHUYÊN DÙNG · GIẢM MỠ"}';
+        break;
+      case 'mass_gain_bulk':
+        icon = '💪';
+        desc = '${"Tập nặng compound kích thích tăng khối lượng cơ bắp, kết hợp thực đơn dồi dào calo."}';
+        if (p.isBulking || p.bmi < 19.0) badge = '${"💪 KHUYÊN DÙNG · TĂNG CƠ"}';
+        break;
+      case 'beginner_friendly':
+        icon = '🌱';
+        desc = '${"Máy tập và tạ đơn an toàn khớp và cột sống, dễ tập, nhanh quen với form chuẩn."}';
+        if (p.isBeginner && p.bmi >= 19.0 && p.bmi < 24.0) badge = '${"🌱 KHUYÊN DÙNG · NGƯỜI MỚI"}';
+        break;
+      case 'ppl':
+        icon = '⚡';
+        desc = '${"Giáo án 3 buổi phân chia Đẩy (Ngực/Vai) - Kéo (Lưng/Tay) - Chân kinh điển hiệu quả cao."}';
+        if (!p.isCutting && !p.isBulking && !p.isBeginner && !p.isAdvanced) {
+          badge = '${"🔥 PHỔ BIẾN NHẤT"}';
+        }
+        break;
+      case 'upperlower':
+        icon = '⚖️';
+        desc = '${"Phân chia 4 buổi luân phiên Thân Trên và Thân Dưới, cơ bắp phục hồi tối ưu 48h."}';
+        if (p.isIntermediate && !p.isCutting && !p.isBulking) {
+          badge = '${"⭐ KHUYÊN DÙNG CHO BẠN"}';
+        }
+        break;
+      case 'ppl_6day':
+        icon = '🏆';
+        desc = '${"Cường độ cao 6 buổi/tuần dành cho gymer lâu năm muốn tối đa hóa phì đại cơ."}';
+        if (p.isAdvanced) badge = '${"🏆 VẬN ĐỘNG VIÊN"}';
+        break;
+      case 'calisthenics':
+        icon = '🤸';
+        desc = '${"Tập luyện không cần tạ, sử dụng trọng lượng cơ thể linh hoạt tại nhà hoặc ngoài trời."}';
+        break;
+      default:
+        desc = t.templateBlurb(template.id);
+    }
+
+    final daysCount = template.days.length;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        setState(() {
+          _selectedTemplate = template;
+          fit.updateProfile(weeklyGoalDelta: daysCount - fit.profile.weeklyGoal);
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? gc.ember.withValues(alpha: 0.12) : gc.bgRaised,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isSelected ? gc.ember : gc.border,
+            width: isSelected ? 1.8 : 1,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isSelected ? gc.ember : gc.bgRaised2,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(child: Text(icon, style: const TextStyle(fontSize: 22))),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          template.name,
+                          style: AppTheme.f(
+                            15,
+                            weight: FontWeight.w800,
+                            color: isSelected ? gc.ember : gc.text,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                        decoration: BoxDecoration(
+                          color: isSelected ? gc.ember : gc.bgRaised2,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '$daysCount ${"buổi / tuần"}',
+                          style: AppTheme.f(
+                            10.5,
+                            weight: FontWeight.w700,
+                            color: isSelected ? gc.onEmber : gc.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (badge != null) ...[
+                    const SizedBox(height: 5),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: gc.accent,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        badge,
+                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: gc.bg),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 6),
+                  Text(
+                    desc,
+                    style: AppTheme.s(
+                      12,
+                      weight: FontWeight.w500,
+                      color: isSelected ? gc.text : gc.textSecondary,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _goalStep(GymColors gc) {
     final goal = fit.profile.weeklyGoal;
     return _step(
       gc,
-      step: 4,
+      step: 5,
       title: t.onbGoalTitle,
       why: t.onbGoalWhy,
       child: Container(
@@ -607,7 +847,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _placeStep(GymColors gc) {
     return _step(
       gc,
-      step: 5,
+      step: 6,
       title: t.onbPlaceTitle,
       why: t.onbPlaceWhy,
       child: Column(
