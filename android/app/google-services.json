@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "856000499999",
+    "project_id": "fitman-913f8",
+    "storage_bucket": "fitman-913f8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:856000499999:android:838035b042f7bb3ecd602a",
+        "android_client_info": {
+          "package_name": "com.fitman.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzapAZMwOmV1zPn0JVz9ZKgQhoTJNzD98"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
