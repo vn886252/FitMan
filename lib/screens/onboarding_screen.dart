@@ -16,6 +16,7 @@ import '../theme/app_theme.dart';
 import '../widgets/app_background.dart';
 import '../widgets/body_rulers.dart';
 import '../widgets/entrance.dart';
+import '../widgets/liquid_notch.dart';
 import '../widgets/ui_kit.dart';
 import 'settings_screen.dart';
 
@@ -30,9 +31,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _page = PageController();
   late final TextEditingController _name = TextEditingController();
   int _index = 0;
-  static const _last = 6;
+  static const _last = 8;
   final Map<String, Set<String>> _places = {};
   ProgramTemplate? _selectedTemplate;
+
+  final TextEditingController _authEmail = TextEditingController();
+  final TextEditingController _authPass = TextEditingController();
+  bool _authLoading = false;
+  String? _authError;
+  bool _obscurePass = true;
 
   ProgramTemplate get _effectiveTemplate {
     if (_selectedTemplate != null) return _selectedTemplate!;
@@ -61,6 +68,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void dispose() {
     _page.dispose();
     _name.dispose();
+    _authEmail.dispose();
+    _authPass.dispose();
     super.dispose();
   }
 
@@ -108,6 +117,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       Store.instance.setNote('vietnamese_water_log', jsonEncode({for (final d in days) d: 0}));
     } catch (_) {}
 
+    // 4. Nếu đã đăng nhập Cloud, tự động sync bản sao lưu ban đầu
+    if (CloudSyncService.instance.isLoggedIn) {
+      try {
+        CloudSyncService.instance.syncToCloud();
+      } catch (_) {}
+    }
+
     fit.completeOnboarding();
   }
 
@@ -139,6 +155,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       _programStep(gc),
                       _goalStep(gc),
                       _placeStep(gc),
+                      _trialStep(gc),
+                      _authStep(gc),
                     ],
                   ),
                 ),
@@ -338,165 +356,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   _promise(gc, PhosphorIconsRegular.wifiSlash, t.fullyOffline, t.fullyOfflineWhy),
                   _promise(gc, PhosphorIconsRegular.export, t.yoursToTake, t.yoursToTakeWhy),
                 ]),
-              ),
-              const SizedBox(height: 18),
-              _in(
-                5,
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFFF47E1D).withValues(alpha: 0.16),
-                        const Color(0xFFFF9E40).withValues(alpha: 0.06),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFF47E1D).withValues(alpha: 0.35)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF47E1D),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(PhosphorIconsFill.crown, size: 18, color: Colors.white),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${"7 NGÀY DÙNG THỬ FULL QUYỀN"}',
-                                  style: AppTheme.f(13.5, weight: FontWeight.w800, color: const Color(0xFFF47E1D)),
-                                ),
-                                Text(
-                                  '${"Trải nghiệm trọn vẹn toàn bộ tính năng"}',
-                                  style: AppTheme.f(11.5, weight: FontWeight.w600, color: gc.textSecondary),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '${"• Trong 7 ngày đầu: Bạn được dùng thử toàn bộ giáo án, thực đơn dinh dưỡng và lưu đám mây không giới hạn."}',
-                        style: AppTheme.f(12, weight: FontWeight.w500, color: gc.text, height: 1.4),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${"• Sau khi hết 7 ngày: Dữ liệu của bạn vẫn còn nguyên vẹn ở đó (không bị xóa), nhưng app sẽ dừng lưu buổi tập mới từ ngày thứ 8 trở đi."}',
-                        style: AppTheme.f(12, weight: FontWeight.w500, color: gc.text, height: 1.4),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${"• Quyền riêng tư tuyệt đối: Bạn có thể xóa toàn bộ thông tin của mình bất cứ lúc nào trong Cài đặt."}',
-                        style: AppTheme.f(12, weight: FontWeight.w600, color: const Color(0xFF54B979), height: 1.4),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              _in(
-                6,
-                ListenableBuilder(
-                  listenable: CloudSyncService.instance,
-                  builder: (context, _) {
-                    final cloud = CloudSyncService.instance;
-                    final logged = cloud.isLoggedIn;
-                    return GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => showCloudSyncSheet(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: gc.bgRaised,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: logged
-                                ? gc.accent.withValues(alpha: 0.5)
-                                : gc.border,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 38,
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color: logged
-                                    ? gc.accent.withValues(alpha: 0.16)
-                                    : gc.bgRaised2,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                logged
-                                    ? PhosphorIconsRegular.cloudCheck
-                                    : PhosphorIconsRegular.cloudArrowUp,
-                                size: 20,
-                                color: logged ? gc.accent : gc.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    logged
-                                        ? '${"Đã đồng bộ Cloud: "} ${cloud.currentUser?.email ?? "Thiết bị này"}'
-                                        : '${"Đăng nhập Cloud (Gmail / Tạo tài khoản)"}',
-                                    style: AppTheme.f(13.5,
-                                        weight: FontWeight.w700,
-                                        color: logged ? gc.accent : gc.text),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    logged
-                                        ? '${"Dữ liệu tập luyện được bảo vệ an toàn"}'
-                                        : '${"Đổi điện thoại tập tiếp không sợ mất dữ liệu (Tùy chọn)"}',
-                                    style: AppTheme.f(11.5,
-                                        weight: FontWeight.w500, color: gc.textSecondary),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: logged
-                                    ? gc.accent.withValues(alpha: 0.12)
-                                    : gc.bgRaised2,
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                              child: Text(
-                                logged ? '${"Đã kết nối"}' : '${"Kết nối"}',
-                                style: AppTheme.f(11,
-                                    weight: FontWeight.w700,
-                                    color: logged ? gc.accent : gc.textSecondary),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
               ),
             ],
           ),
@@ -1120,6 +979,491 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
       ),
     );
+  }
+
+  Widget _trialStep(GymColors gc) {
+    return _step(
+      gc,
+      step: 7,
+      title: '${"Dùng Thử 7 Ngày Full Quyền"}',
+      why: '${"Khám phá trọn vẹn toàn bộ tính năng cao cấp của FitMan trước khi quyết định đồng hành lâu dài."}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFF47E1D).withValues(alpha: 0.2),
+                  const Color(0xFFFF9E40).withValues(alpha: 0.06),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: const Color(0xFFF47E1D).withValues(alpha: 0.45), width: 1.5),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF47E1D),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFF47E1D).withValues(alpha: 0.35),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(PhosphorIconsFill.crown, size: 22, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${"DÙNG THỬ 7 NGÀY FULL QUYỀN"}',
+                            style: AppTheme.f(14.5, weight: FontWeight.w800, color: const Color(0xFFF47E1D), letterSpacing: 0.4),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${"Mở khóa 100% giáo án, dinh dưỡng & cloud"}',
+                            style: AppTheme.f(12, weight: FontWeight.w600, color: gc.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                _trialBullet(
+                  gc,
+                  icon: PhosphorIconsFill.lightning,
+                  iconColor: const Color(0xFFF47E1D),
+                  title: '${"Full quyền trải nghiệm trong 7 ngày đầu"}',
+                  desc: '${"Tự do truy cập mọi giáo án cá nhân hóa, 100+ bài tập có hướng dẫn chi tiết, phân bổ thực đơn món Việt chuẩn macro và ghi chép buổi tập không giới hạn."}',
+                ),
+                const SizedBox(height: 14),
+                _trialBullet(
+                  gc,
+                  icon: PhosphorIconsFill.database,
+                  iconColor: const Color(0xFF3B82F6),
+                  title: '${"Sau khi kết thúc 7 ngày dùng thử"}',
+                  desc: '${"Toàn bộ thông tin & lịch sử tập luyện của bạn VẪN CÒN NGUYÊN VẸN Ở ĐÓ (không bị mất), nhưng app sẽ dừng lưu tiếp các buổi tập mới từ ngày thứ 8 trở đi cho đến khi bạn gia hạn."}',
+                ),
+                const SizedBox(height: 14),
+                _trialBullet(
+                  gc,
+                  icon: PhosphorIconsFill.shieldCheck,
+                  iconColor: const Color(0xFF54B979),
+                  title: '${"Làm chủ dữ liệu & Quyền riêng tư tuyệt đối"}',
+                  desc: '${"Bạn có quyền XÓA TOÀN BỘ THÔNG TIN của mình bất cứ lúc nào trong phần Cài đặt chỉ với một nút bấm."}',
+                ),
+                const SizedBox(height: 14),
+                _trialBullet(
+                  gc,
+                  icon: PhosphorIconsFill.checkCircle,
+                  iconColor: const Color(0xFF10B981),
+                  title: '${"Cam kết minh bạch 100%"}',
+                  desc: '${"Không tự động trừ tiền âm thầm, không yêu cầu thẻ tín dụng trước, không bao giờ có quảng cáo làm phiền."}',
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _trialBullet(
+    GymColors gc, {
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String desc,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 2),
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 14, color: iconColor),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTheme.f(13.5, weight: FontWeight.w700, color: gc.text),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                desc,
+                style: AppTheme.f(12, weight: FontWeight.w500, color: gc.textSecondary, height: 1.45),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _authStep(GymColors gc) {
+    return _step(
+      gc,
+      step: 8,
+      title: '${"Đăng Nhập & Đồng Bộ Cloud"}',
+      why: '${"Lưu trữ dữ liệu an toàn trên đám mây để khi đổi điện thoại, bạn chỉ cần đăng nhập là tiếp tục tập luyện, không sợ mất lịch sử."}',
+      child: ListenableBuilder(
+        listenable: CloudSyncService.instance,
+        builder: (context, _) {
+          final cloud = CloudSyncService.instance;
+          final logged = cloud.isLoggedIn;
+
+          if (logged) {
+            return Container(
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: const Color(0xFF54B979).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFF54B979).withValues(alpha: 0.4), width: 1.5),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF54B979).withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(PhosphorIconsFill.checkCircle, size: 32, color: Color(0xFF54B979)),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    '${"Đã Kết Nối Đám Mây!"}',
+                    style: AppTheme.f(17, weight: FontWeight.w800, color: const Color(0xFF54B979)),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    cloud.currentUser?.email ?? '${"Tài khoản đám mây (Ẩn danh)"}',
+                    style: AppTheme.f(14, weight: FontWeight.w600, color: gc.text),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${"Dữ liệu tập luyện của bạn đã được bảo vệ. Bấm nút Bắt đầu bên dưới để hoàn tất và vào tập luyện ngay!"}',
+                    style: AppTheme.f(12.5, weight: FontWeight.w500, color: gc.textSecondary, height: 1.45),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () async {
+                      await cloud.signOut();
+                      setState(() {});
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: Text(
+                        '${"Đăng xuất hoặc đổi tài khoản khác"}',
+                        style: AppTheme.f(12, weight: FontWeight.w600, color: gc.textTertiary),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_authError != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: gc.warn.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: gc.warn.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(PhosphorIconsRegular.warningCircle, size: 18, color: gc.warn),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _authError!,
+                          style: AppTheme.f(12, weight: FontWeight.w600, color: gc.warn),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
+
+              // Card nhập Email / Mật khẩu
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: gc.bgRaised,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: gc.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      '${"Đăng nhập bằng Email / Gmail"}',
+                      style: AppTheme.f(13.5, weight: FontWeight.w700, color: gc.text),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: gc.bgRaised2,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: gc.border),
+                      ),
+                      child: TextField(
+                        controller: _authEmail,
+                        keyboardType: TextInputType.emailAddress,
+                        style: AppTheme.f(14, weight: FontWeight.w600, color: gc.text),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          icon: Icon(PhosphorIconsRegular.envelopeSimple, size: 18, color: gc.textSecondary),
+                          hintText: '${"Nhập Gmail / Email của bạn"}',
+                          hintStyle: AppTheme.f(13.5, weight: FontWeight.w500, color: gc.textTertiary),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: gc.bgRaised2,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: gc.border),
+                      ),
+                      child: TextField(
+                        controller: _authPass,
+                        obscureText: _obscurePass,
+                        style: AppTheme.f(14, weight: FontWeight.w600, color: gc.text),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          icon: Icon(PhosphorIconsRegular.lockKey, size: 18, color: gc.textSecondary),
+                          hintText: '${"Mật khẩu (ít nhất 6 ký tự)"}',
+                          hintStyle: AppTheme.f(13.5, weight: FontWeight.w500, color: gc.textTertiary),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePass ? PhosphorIconsRegular.eyeSlash : PhosphorIconsRegular.eye,
+                              size: 18,
+                              color: gc.textTertiary,
+                            ),
+                            onPressed: () => setState(() => _obscurePass = !_obscurePass),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PrimaryButton(
+                            label: _authLoading ? '${"Đang xử lý..."}' : '${"Đăng Nhập"}',
+                            bg: gc.bgRaised2,
+                            fg: gc.text,
+                            onTap: _authLoading ? () {} : () => _doEmailAuth(isRegister: false),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: PrimaryButton(
+                            label: _authLoading ? '${"Đang xử lý..."}' : '${"Tạo Mới"}',
+                            bg: gc.accent,
+                            fg: gc.bg,
+                            onTap: _authLoading ? () {} : () => _doEmailAuth(isRegister: true),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(child: Divider(color: gc.border)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('${"HOẶC"}',
+                        style: AppTheme.f(11, weight: FontWeight.w700, color: gc.textTertiary)),
+                  ),
+                  Expanded(child: Divider(color: gc.border)),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              // Nút tạo đại 1 tài khoản (1 chạm)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _authLoading ? null : _doAnonymousAuth,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: gc.bgRaised,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: gc.accent.withValues(alpha: 0.35)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: gc.accent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(PhosphorIconsFill.lightning, size: 20, color: gc.accent),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${"Tạo đại 1 tài khoản (1 chạm)"}',
+                              style: AppTheme.f(14, weight: FontWeight.w700, color: gc.accent),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${"Không cần mật khẩu, tự động cấp ID Cloud cho máy này"}',
+                              style: AppTheme.f(11.5, weight: FontWeight.w500, color: gc.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(PhosphorIconsBold.caretRight, size: 14, color: gc.textSecondary),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+              // Nút mở tùy chọn đăng nhập chi tiết
+              Center(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => showCloudSyncSheet(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(PhosphorIconsRegular.cloudArrowUp, size: 16, color: gc.accent),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${"Mở bảng đồng bộ Cloud chi tiết"}',
+                          style: AppTheme.f(12.5, weight: FontWeight.w600, color: gc.accent),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+              Center(
+                child: Text(
+                  '${"💡 Bạn có thể bỏ qua bước này bằng cách bấm nút Bắt đầu bên dưới và đăng nhập sau trong Cài đặt."}',
+                  style: AppTheme.f(11.5, weight: FontWeight.w500, color: gc.textTertiary, height: 1.4),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _doEmailAuth({required bool isRegister}) async {
+    final email = _authEmail.text.trim();
+    final pass = _authPass.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() => _authError = '${"Vui lòng nhập địa chỉ email hợp lệ"}');
+      return;
+    }
+    if (pass.length < 6) {
+      setState(() => _authError = '${"Mật khẩu phải có ít nhất 6 ký tự"}');
+      return;
+    }
+
+    setState(() {
+      _authLoading = true;
+      _authError = null;
+    });
+
+    final cloud = CloudSyncService.instance;
+    final err = isRegister ? await cloud.register(email, pass) : await cloud.signIn(email, pass);
+
+    if (!mounted) return;
+    setState(() {
+      _authLoading = false;
+      _authError = err;
+    });
+
+    if (err == null) {
+      showNotchToast(
+        context,
+        isRegister ? '${"Tạo tài khoản thành công!"}' : '${"Đăng nhập thành công!"}',
+        icon: PhosphorIconsFill.checkCircle,
+        accent: const Color(0xFF54B979),
+      );
+    }
+  }
+
+  Future<void> _doAnonymousAuth() async {
+    setState(() {
+      _authLoading = true;
+      _authError = null;
+    });
+
+    final cloud = CloudSyncService.instance;
+    final err = await cloud.signInAnonymously();
+
+    if (!mounted) return;
+    setState(() {
+      _authLoading = false;
+      _authError = err;
+    });
+
+    if (err == null) {
+      showNotchToast(
+        context,
+        '${"Đã tạo tài khoản đám mây cho thiết bị!"}',
+        icon: PhosphorIconsFill.checkCircle,
+        accent: const Color(0xFF54B979),
+      );
+    }
   }
 
   void _up(VoidCallback action) {

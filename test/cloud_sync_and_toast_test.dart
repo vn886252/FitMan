@@ -54,6 +54,9 @@ void main() {
     fit.onboarded = false;
     await tester.pumpWidget(const GymManeApp());
     expect(find.byType(OnboardingScreen), findsOneWidget);
+    final pageView = tester.widget<PageView>(find.byType(PageView));
+    final children = (pageView.childrenDelegate as SliverChildListDelegate).children;
+    expect(children.length, 9, reason: 'Onboarding must have 9 steps (0 to 8)');
     final err = tester.takeException();
     expect(err, isNull);
   });
